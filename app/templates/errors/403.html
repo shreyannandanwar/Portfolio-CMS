@@ -1,0 +1,53 @@
+{% extends "base.html" %}
+
+{% block title %}Access Denied - 403{% endblock %}
+
+{% block body %}
+<div class="min-h-screen flex items-center justify-center px-4 bg-gradient-to-br from-red-50 via-pink-50 to-purple-50 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900">
+    <div class="text-center max-w-2xl mx-auto">
+        <!-- Animated 403 -->
+        <div class="mb-8">
+            <h1 class="text-9xl font-bold bg-gradient-to-r from-red-600 via-pink-600 to-purple-600 bg-clip-text text-transparent">
+                403
+            </h1>
+        </div>
+        
+        <!-- Icon -->
+        <div class="mb-6">
+            <i class="fas fa-lock text-6xl text-gray-400 dark:text-gray-600"></i>
+        </div>
+        
+        <!-- Message -->
+        <h2 class="text-3xl md:text-4xl font-bold text-gray-900 dark:text-white mb-4">
+            Access Denied
+        </h2>
+        
+        <p class="text-lg text-gray-600 dark:text-gray-400 mb-8">
+            You don't have permission to access this resource. This area is restricted to authorized users only.
+        </p>
+        
+        <!-- Action Buttons -->
+        <div class="flex flex-col sm:flex-row gap-4 justify-center">
+            <a href="{{ url_for('public.home') }}" class="inline-flex items-center px-8 py-4 bg-gradient-to-r from-primary-600 to-primary-700 hover:from-primary-700 hover:to-primary-800 text-white rounded-xl font-semibold shadow-lg hover:shadow-xl transition-all duration-200 transform hover:-translate-y-0.5">
+                <i class="fas fa-home mr-2"></i>
+                Go Home
+            </a>
+            
+            <a href="javascript:history.back()" class="inline-flex items-center px-8 py-4 bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700 text-gray-900 dark:text-white rounded-xl font-semibold shadow-lg hover:shadow-xl transition-all duration-200 transform hover:-translate-y-0.5 border border-gray-200 dark:border-gray-700">
+                <i class="fas fa-arrow-left mr-2"></i>
+                Go Back
+            </a>
+        </div>
+    </div>
+</div>
+
+<script>
+    window.addEventListener('load', function() {
+        const isDark = document.documentElement.classList.contains('dark');
+        const icon = document.getElementById('theme-toggle-icon');
+        if (icon) {
+            icon.className = isDark ? 'fas fa-sun' : 'fas fa-moon';
+        }
+    });
+</script>
+{% endblock %}

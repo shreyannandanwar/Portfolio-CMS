@@ -1,0 +1,40 @@
+services:
+  - type: web
+    name: portfolio
+    env: python
+    buildCommand: pip install -r requirements.txt
+    startCommand: gunicorn -w 2 -b 0.0.0.0:$PORT "app:create_app('production')"
+    envVars:
+      - key: FLASK_ENV
+        value: production
+      - key: PYTHON_VERSION
+        value: 3.11.0
+disk:
+      name: portfolio-data
+      mountPath: /data
+      sizeGB: 1
+```
+
+Then your `init_db.py` and `create_admin.py` run once and data persists forever.
+
+**Option B — Use Render PostgreSQL free for 90 days**, then export and migrate. Fine if you just want to get live now and deal with it later.
+
+**My recommendation: Option A.** SQLite handles 50–100 visits/day with zero issues. You're not running a bank.
+
+---
+
+## Step 3 — Deploy on Render (15 mins)
+
+1. Push everything to GitHub including `Procfile`, `render.yaml`, updated `requirements.txt`
+2. Go to [render.com](https://render.com) → Sign up with GitHub
+3. Click **New** → **Web Service**
+4. Connect your GitHub repo → select it
+5. Render auto-detects the `render.yaml` — review and confirm
+6. Set these environment variables in the dashboard:
+```
+SECRET_KEY          → generate one here: python -c "import secrets; print(secrets.token_hex(32))"
+DATABASE_URL        → sqlite:////data/portfolio.db
+GITHUB_USERNAME     → shreyannandanwar
+ADMIN_URL_PREFIX    → /your-obscured-admin-path
+LOG_LEVEL           → WARNING
+FLASK_ENV           → production

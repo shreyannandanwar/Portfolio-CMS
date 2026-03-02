@@ -1,0 +1,378 @@
+{% extends "base.html" %}
+
+{% block title %}{{ post.title }} — Shreyan Nandanwar{% endblock %}
+
+{% block extra_head %}
+<style>
+  /* Article prose styling — matches dark theme */
+  .sn-prose { max-width: none; }
+  .sn-prose h1, .sn-prose h2, .sn-prose h3, .sn-prose h4 {
+    font-family: 'Playfair Display', Georgia, serif;
+    color: #f0ede8; font-weight: 700; line-height: 1.15;
+    margin-top: 2.2em; margin-bottom: 0.6em; letter-spacing: -0.01em;
+  }
+  .sn-prose h1 { font-size: 2.4em; }
+  .sn-prose h2 { font-size: 1.8em; border-bottom: 1px solid rgba(255,255,255,0.07); padding-bottom: 0.3em; }
+  .sn-prose h3 { font-size: 1.3em; }
+  .sn-prose p { font-size: 17px; line-height: 1.85; color: #a0998f; margin-bottom: 1.4em; }
+  .sn-prose strong { color: #f0ede8; font-weight: 600; }
+  .sn-prose em { color: #c8c0b4; font-style: italic; }
+  .sn-prose a { color: #47c8ff; text-decoration: none; border-bottom: 1px solid rgba(71,200,255,0.3); transition: border-color 0.2s; }
+  .sn-prose a:hover { border-color: #47c8ff; }
+  .sn-prose ul, .sn-prose ol { margin: 0 0 1.4em 1.4em; color: #a0998f; }
+  .sn-prose li { font-size: 16px; line-height: 1.8; margin-bottom: 0.4em; }
+  .sn-prose ul li::marker { color: #e8ff47; }
+  .sn-prose ol li::marker { color: #e8ff47; font-family: 'JetBrains Mono', monospace; font-size: 0.85em; }
+  .sn-prose blockquote {
+    border-left: 2px solid #e8ff47;
+    padding: 16px 24px;
+    margin: 2em 0;
+    background: rgba(232,255,71,0.03);
+    font-style: italic;
+    color: #888;
+  }
+  .sn-prose blockquote p { color: #888; margin-bottom: 0; }
+  .sn-prose code {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 13px;
+    background: #181818;
+    color: #e8ff47;
+    padding: 2px 8px;
+    border: 1px solid rgba(255,255,255,0.07);
+  }
+  .sn-prose pre {
+    background: #111111;
+    border: 1px solid rgba(255,255,255,0.07);
+    padding: 24px;
+    overflow-x: auto;
+    margin: 1.8em 0;
+  }
+  .sn-prose pre code {
+    background: none; border: none;
+    color: #f0ede8; padding: 0; font-size: 13px; line-height: 1.7;
+  }
+  .sn-prose img { max-width: 100%; margin: 2em 0; border: 1px solid rgba(255,255,255,0.07); }
+  .sn-prose table { width: 100%; border-collapse: collapse; margin: 1.8em 0; }
+  .sn-prose th {
+    font-family: 'JetBrains Mono', monospace; font-size: 11px;
+    letter-spacing: 0.1em; text-transform: uppercase;
+    color: #666; background: #111;
+    padding: 12px 16px; border: 1px solid rgba(255,255,255,0.07);
+    text-align: left;
+  }
+  .sn-prose td { padding: 12px 16px; border: 1px solid rgba(255,255,255,0.07); color: #a0998f; font-size: 15px; }
+  .sn-prose hr { border: none; border-top: 1px solid rgba(255,255,255,0.07); margin: 3em 0; }
+</style>
+{% endblock %}
+
+{% block body %}
+
+<style>
+  :root {
+    --bg: #0a0a0a; --bg2: #111111; --bg3: #181818;
+    --line: rgba(255,255,255,0.07);
+    --accent: #e8ff47; --accent2: #47c8ff;
+    --text: #f0ede8; --muted: #666; --muted2: #444;
+    --serif: 'Playfair Display', Georgia, serif;
+    --mono: 'JetBrains Mono', monospace;
+    --sans: 'Instrument Sans', sans-serif;
+  }
+  body { background: var(--bg) !important; color: var(--text) !important; font-family: var(--sans) !important; overflow-x: hidden; cursor: none; }
+  .cursor { width:8px;height:8px;background:var(--accent);border-radius:50%;position:fixed;pointer-events:none;z-index:9999;transition:transform 0.15s;mix-blend-mode:difference; }
+  .cursor-ring { width:36px;height:36px;border:1px solid rgba(232,255,71,0.4);border-radius:50%;position:fixed;pointer-events:none;z-index:9998;mix-blend-mode:difference; }
+  body::before { content:'';position:fixed;inset:0;background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='1'/%3E%3C/svg%3E");opacity:0.025;pointer-events:none;z-index:9997; }
+
+  /* NAV */
+  #bd-nav {
+    position:fixed;top:0;left:0;right:0;z-index:100;
+    display:flex;justify-content:space-between;align-items:center;
+    padding:20px 48px;
+    border-bottom:1px solid var(--line);
+    background:rgba(10,10,10,0.92);
+    backdrop-filter:blur(12px);
+  }
+  .bd-nav-logo { font-family:var(--mono);font-size:13px;color:var(--muted);letter-spacing:0.05em;text-decoration:none; }
+  .bd-nav-logo span { color:var(--accent); }
+  .bd-nav-links { display:flex;gap:24px;align-items:center; }
+  .bd-nav-link {
+    font-family:var(--mono);font-size:11px;color:var(--muted);
+    text-decoration:none;letter-spacing:0.1em;text-transform:uppercase;
+    transition:color 0.2s;
+  }
+  .bd-nav-link:hover { color:var(--text);text-decoration:none; }
+
+  /* ARTICLE HEADER */
+  .bd-header {
+    padding: 140px 48px 80px;
+    border-bottom: 1px solid var(--line);
+    position: relative; overflow: hidden;
+  }
+  .bd-header-bg {
+    position:absolute;inset:0;
+    background-image:linear-gradient(var(--line) 1px,transparent 1px),linear-gradient(90deg,var(--line) 1px,transparent 1px);
+    background-size:80px 80px;
+    mask-image:radial-gradient(ellipse 60% 80% at 80% 50%,black,transparent);
+    -webkit-mask-image:radial-gradient(ellipse 60% 80% at 80% 50%,black,transparent);
+  }
+  .bd-header-inner { max-width:760px;margin:0 auto;position:relative;z-index:1; }
+  .bd-header-back {
+    display:inline-flex;align-items:center;gap:8px;
+    font-family:var(--mono);font-size:11px;color:var(--muted2);
+    text-decoration:none;letter-spacing:0.1em;text-transform:uppercase;
+    margin-bottom:32px;transition:color 0.2s;
+  }
+  .bd-header-back:hover { color:var(--text);text-decoration:none; }
+  .bd-header-tags { display:flex;flex-wrap:wrap;gap:6px;margin-bottom:20px; }
+  .bd-header-tag {
+    font-family:var(--mono);font-size:10px;
+    padding:4px 10px;
+    border:1px solid var(--accent2);
+    color:var(--accent2);letter-spacing:0.1em;text-transform:uppercase;
+  }
+  .bd-header-title {
+    font-family:var(--serif);
+    font-size:clamp(36px,6vw,72px);
+    font-weight:900;line-height:1.05;
+    letter-spacing:-0.02em;color:var(--text);
+    margin-bottom:32px;
+  }
+  .bd-header-meta {
+    display:flex;flex-wrap:wrap;gap:24px;
+    font-family:var(--mono);font-size:11px;
+    color:var(--muted2);letter-spacing:0.08em;text-transform:uppercase;
+  }
+  .bd-header-meta-item { display:flex;align-items:center;gap:8px; }
+  .bd-header-meta-dot { width:4px;height:4px;border-radius:50%;background:var(--muted2); }
+
+  /* ARTICLE LAYOUT */
+  .bd-layout {
+    max-width:1100px;margin:0 auto;
+    padding:80px 48px 120px;
+    display:grid;
+    grid-template-columns:1fr 280px;
+    gap:80px;
+    align-items:start;
+  }
+
+  /* CONTENT */
+  .bd-content {}
+  .bd-article-box {
+    padding: 0;
+  }
+
+  /* SIDEBAR */
+  .bd-sidebar { position:sticky;top:100px; }
+  .bd-sidebar-section { margin-bottom:40px; }
+  .bd-sidebar-label {
+    font-family:var(--mono);font-size:10px;color:var(--muted2);
+    letter-spacing:0.15em;text-transform:uppercase;
+    margin-bottom:16px;
+    padding-bottom:8px;
+    border-bottom:1px solid var(--line);
+  }
+  .bd-share-btns { display:flex;flex-direction:column;gap:2px;background:var(--line); }
+  .bd-share-btn {
+    display:flex;justify-content:space-between;align-items:center;
+    padding:12px 16px;background:var(--bg);
+    font-family:var(--mono);font-size:11px;
+    color:var(--muted);letter-spacing:0.08em;text-transform:uppercase;
+    border:none;cursor:pointer;text-decoration:none;
+    transition:background 0.2s,color 0.2s;
+  }
+  .bd-share-btn:hover { background:var(--bg2);color:var(--text);text-decoration:none; }
+  .bd-share-arrow { color:var(--accent);font-size:14px; }
+
+  .bd-back-btn {
+    display:flex;justify-content:space-between;align-items:center;
+    padding:14px 16px;
+    background:var(--bg2);
+    border:1px solid var(--muted2);
+    font-family:var(--mono);font-size:11px;
+    color:var(--muted);letter-spacing:0.08em;text-transform:uppercase;
+    text-decoration:none;
+    transition:border-color 0.2s,color 0.2s;
+  }
+  .bd-back-btn:hover { border-color:var(--text);color:var(--text);text-decoration:none; }
+
+  /* FOOTER */
+  .bd-footer {
+    border-top:1px solid var(--line);
+    padding:32px 48px;
+    display:flex;justify-content:space-between;align-items:center;
+    background:var(--bg);
+  }
+  .bd-footer-left { font-family:var(--mono);font-size:11px;color:var(--muted2); }
+  .bd-footer-right { font-family:var(--mono);font-size:11px;color:var(--muted2); }
+  .bd-footer-right a { color:var(--muted2);text-decoration:none;transition:color 0.2s; }
+  .bd-footer-right a:hover { color:var(--accent); }
+
+  .sn-reveal { opacity:0;transform:translateY(24px);transition:opacity 0.6s ease,transform 0.6s ease; }
+  .sn-reveal.visible { opacity:1;transform:translateY(0); }
+  ::selection { background:var(--accent);color:#0a0a0a; }
+
+  @media (max-width:900px) {
+    .bd-layout { grid-template-columns:1fr;gap:48px; }
+    .bd-sidebar { position:static; }
+    #bd-nav { padding:16px 24px; }
+    .bd-header { padding:120px 24px 60px; }
+    .bd-layout { padding:48px 24px 80px; }
+    .bd-footer { flex-direction:column;gap:8px;text-align:center;padding:24px; }
+  }
+</style>
+
+<div class="cursor" id="bdCursor"></div>
+<div class="cursor-ring" id="bdRing"></div>
+
+<!-- NAV -->
+<nav id="bd-nav">
+  <a href="{{ url_for('public.home') }}" class="bd-nav-logo">sn<span>.</span>dev</a>
+  <div class="bd-nav-links">
+    <a href="{{ url_for('public.blog_timeline') }}" class="bd-nav-link">← All Writing</a>
+    <a href="{{ url_for('public.home') }}" class="bd-nav-link">Home</a>
+  </div>
+</nav>
+
+<!-- ARTICLE HEADER -->
+<div class="bd-header">
+  <div class="bd-header-bg"></div>
+  <div class="bd-header-inner sn-reveal">
+    <a href="{{ url_for('public.blog_timeline') }}" class="bd-header-back">← All Writing</a>
+
+    {% if post.tags %}
+      <div class="bd-header-tags">
+        {% for tag in post.tags %}
+          <span class="bd-header-tag">{{ tag.name }}</span>
+        {% endfor %}
+      </div>
+    {% endif %}
+
+    <h1 class="bd-header-title">{{ post.title }}</h1>
+
+    <div class="bd-header-meta">
+      <div class="bd-header-meta-item">
+        <span>{{ post.created_at.strftime('%B %d, %Y') }}</span>
+      </div>
+      {% if post.updated_at and post.updated_at != post.created_at %}
+        <div class="bd-header-meta-item">
+          <div class="bd-header-meta-dot"></div>
+          <span>Updated {{ post.updated_at.strftime('%B %d, %Y') }}</span>
+        </div>
+      {% endif %}
+      <div class="bd-header-meta-item">
+        <div class="bd-header-meta-dot"></div>
+        <span>{{ (post.markdown_content|length / 200)|round|int }} min read</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ARTICLE LAYOUT -->
+<div class="bd-layout">
+
+  <!-- CONTENT -->
+  <div class="bd-content sn-reveal">
+    <div class="bd-article-box">
+      <div class="sn-prose">
+        {{ post.html_content|safe }}
+      </div>
+    </div>
+  </div>
+
+  <!-- SIDEBAR -->
+  <aside class="bd-sidebar sn-reveal">
+
+    <div class="bd-sidebar-section">
+      <div class="bd-sidebar-label">// Share</div>
+      <div class="bd-share-btns">
+        <button onclick="shareOnTwitter()" class="bd-share-btn">
+          <span>Twitter / X</span>
+          <span class="bd-share-arrow">→</span>
+        </button>
+        <button onclick="shareOnLinkedIn()" class="bd-share-btn">
+          <span>LinkedIn</span>
+          <span class="bd-share-arrow">→</span>
+        </button>
+        <button onclick="copyLink()" class="bd-share-btn" id="copyBtn">
+          <span>Copy link</span>
+          <span class="bd-share-arrow">→</span>
+        </button>
+      </div>
+    </div>
+
+    {% if post.tags %}
+    <div class="bd-sidebar-section">
+      <div class="bd-sidebar-label">// Tags</div>
+      <div style="display:flex;flex-wrap:wrap;gap:6px;">
+        {% for tag in post.tags %}
+          <span style="font-family:var(--mono);font-size:10px;padding:4px 10px;border:1px solid var(--muted2);color:var(--muted);letter-spacing:0.08em;text-transform:uppercase;">
+            {{ tag.name }}
+          </span>
+        {% endfor %}
+      </div>
+    </div>
+    {% endif %}
+
+    <div class="bd-sidebar-section">
+      <div class="bd-sidebar-label">// Navigation</div>
+      <a href="{{ url_for('public.blog_timeline') }}" class="bd-back-btn">
+        <span>All writing</span>
+        <span style="color:var(--accent);">→</span>
+      </a>
+    </div>
+
+  </aside>
+</div>
+
+<!-- FOOTER -->
+<footer class="bd-footer">
+  <div class="bd-footer-left">© 2025 Shreyan Nandanwar</div>
+  <div class="bd-footer-right">
+    <a href="/control-panel-9f2c8a/login">Admin</a>
+  </div>
+</footer>
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700;900&family=JetBrains+Mono:wght@300;400;500&family=Instrument+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+
+<script>
+  const bdC = document.getElementById('bdCursor');
+  const bdR = document.getElementById('bdRing');
+  let mx=0,my=0,rx=0,ry=0;
+  document.addEventListener('mousemove',e=>{
+    mx=e.clientX;my=e.clientY;
+    bdC.style.left=mx-4+'px';bdC.style.top=my-4+'px';
+  });
+  (function anim(){ rx+=(mx-rx)*0.12; ry+=(my-ry)*0.12;
+    bdR.style.left=rx-18+'px'; bdR.style.top=ry-18+'px';
+    requestAnimationFrame(anim); })();
+  document.querySelectorAll('a,button').forEach(el=>{
+    el.addEventListener('mouseenter',()=>{ bdC.style.transform='scale(2.5)'; bdR.style.transform='scale(1.4)'; });
+    el.addEventListener('mouseleave',()=>{ bdC.style.transform='scale(1)'; bdR.style.transform='scale(1)'; });
+  });
+
+  const obs = new IntersectionObserver(entries=>{
+    entries.forEach(e=>{ if(e.isIntersecting){ e.target.classList.add('visible'); obs.unobserve(e.target); }});
+  },{threshold:0.05});
+  document.querySelectorAll('.sn-reveal').forEach(el=>obs.observe(el));
+
+  function shareOnTwitter() {
+  const url = window.location.href;
+  const text = document.title;  // pulls the <title> tag — safe, no Jinja quoting issues
+  window.open(
+    'https://twitter.com/intent/tweet?url=' + encodeURIComponent(url) + '&text=' + encodeURIComponent(text),
+    '_blank'
+  );
+}
+  function shareOnLinkedIn() {
+    window.open(`https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(window.location.href)}`,'_blank');
+  }
+  function copyLink() {
+    navigator.clipboard.writeText(window.location.href).then(()=>{
+      const btn = document.getElementById('copyBtn');
+      const span = btn.querySelector('span');
+      span.textContent = 'Copied!';
+      setTimeout(()=>{ span.textContent = 'Copy link'; }, 2000);
+    });
+  }
+</script>
+{% endblock %}

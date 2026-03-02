@@ -1,0 +1,468 @@
+{% extends "base.html" %}
+
+{% block title %}Writing — Shreyan Nandanwar{% endblock %}
+
+{% block body %}
+
+<style>
+  :root {
+    --bg: #0a0a0a;
+    --bg2: #111111;
+    --bg3: #181818;
+    --line: rgba(255,255,255,0.07);
+    --accent: #e8ff47;
+    --accent2: #47c8ff;
+    --text: #f0ede8;
+    --muted: #666;
+    --muted2: #444;
+    --serif: 'Playfair Display', Georgia, serif;
+    --mono: 'JetBrains Mono', monospace;
+    --sans: 'Instrument Sans', sans-serif;
+  }
+
+  body {
+    background: var(--bg) !important;
+    color: var(--text) !important;
+    font-family: var(--sans) !important;
+    overflow-x: hidden;
+    cursor: none;
+  }
+
+  .cursor {
+    width: 8px; height: 8px;
+    background: var(--accent);
+    border-radius: 50%;
+    position: fixed;
+    pointer-events: none;
+    z-index: 9999;
+    transition: transform 0.15s ease;
+    mix-blend-mode: difference;
+  }
+  .cursor-ring {
+    width: 36px; height: 36px;
+    border: 1px solid rgba(232,255,71,0.4);
+    border-radius: 50%;
+    position: fixed;
+    pointer-events: none;
+    z-index: 9998;
+    mix-blend-mode: difference;
+  }
+
+  body::before {
+    content: '';
+    position: fixed; inset: 0;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='1'/%3E%3C/svg%3E");
+    opacity: 0.025;
+    pointer-events: none;
+    z-index: 9997;
+  }
+
+  /* NAV */
+  #bl-nav {
+    position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+    display: flex; justify-content: space-between; align-items: center;
+    padding: 20px 48px;
+    border-bottom: 1px solid var(--line);
+    background: rgba(10,10,10,0.92);
+    backdrop-filter: blur(12px);
+  }
+  .bl-nav-logo {
+    font-family: var(--mono); font-size: 13px;
+    color: var(--muted); letter-spacing: 0.05em; text-decoration: none;
+  }
+  .bl-nav-logo span { color: var(--accent); }
+  .bl-nav-back {
+    font-family: var(--mono); font-size: 11px;
+    color: var(--muted); text-decoration: none;
+    letter-spacing: 0.1em; text-transform: uppercase;
+    transition: color 0.2s;
+    display: flex; align-items: center; gap: 8px;
+  }
+  .bl-nav-back:hover { color: var(--text); text-decoration: none; }
+
+  /* HEADER */
+  .bl-header {
+    padding: 140px 48px 80px;
+    position: relative; overflow: hidden;
+    border-bottom: 1px solid var(--line);
+  }
+  .bl-header-grid {
+    position: absolute; inset: 0;
+    background-image:
+      linear-gradient(var(--line) 1px, transparent 1px),
+      linear-gradient(90deg, var(--line) 1px, transparent 1px);
+    background-size: 80px 80px;
+    mask-image: radial-gradient(ellipse 70% 80% at 20% 50%, black, transparent);
+    -webkit-mask-image: radial-gradient(ellipse 70% 80% at 20% 50%, black, transparent);
+  }
+  .bl-header-inner {
+    max-width: 1100px; margin: 0 auto;
+    position: relative; z-index: 1;
+    display: grid; grid-template-columns: 1fr 1fr; gap: 80px; align-items: end;
+  }
+  .bl-header-eyebrow {
+    font-family: var(--mono); font-size: 11px;
+    color: var(--muted); letter-spacing: 0.15em;
+    text-transform: uppercase; margin-bottom: 20px;
+    display: flex; align-items: center; gap: 12px;
+  }
+  .bl-header-eyebrow::before {
+    content: ''; width: 32px; height: 1px; background: var(--muted2);
+  }
+  .bl-header-title {
+    font-family: var(--serif);
+    font-size: clamp(48px, 7vw, 96px);
+    font-weight: 900; line-height: 0.95;
+    letter-spacing: -0.02em; color: var(--text);
+  }
+  .bl-header-title em { font-style: italic; color: var(--accent); }
+  .bl-header-right {
+    padding-bottom: 8px;
+  }
+  .bl-header-desc {
+    font-size: 16px; color: var(--muted);
+    line-height: 1.7; margin-bottom: 32px; max-width: 400px;
+  }
+
+  /* SEARCH */
+  .bl-search-form { position: relative; }
+  .bl-search-input {
+    width: 100%;
+    padding: 14px 48px 14px 16px;
+    background: var(--bg2);
+    border: 1px solid var(--muted2);
+    color: var(--text);
+    font-family: var(--mono);
+    font-size: 13px;
+    letter-spacing: 0.05em;
+    outline: none;
+    transition: border-color 0.2s;
+  }
+  .bl-search-input::placeholder { color: var(--muted2); }
+  .bl-search-input:focus { border-color: var(--accent); }
+  .bl-search-btn {
+    position: absolute; right: 0; top: 0; bottom: 0;
+    padding: 0 16px;
+    background: var(--accent); border: none; cursor: pointer;
+    font-family: var(--mono); font-size: 11px;
+    color: #0a0a0a; letter-spacing: 0.1em; text-transform: uppercase;
+    transition: background 0.2s;
+  }
+  .bl-search-btn:hover { background: var(--accent2); }
+  .bl-search-clear {
+    position: absolute; right: 80px; top: 50%; transform: translateY(-50%);
+    font-family: var(--mono); font-size: 10px;
+    color: var(--muted2); text-decoration: none;
+    letter-spacing: 0.1em; transition: color 0.2s;
+  }
+  .bl-search-clear:hover { color: var(--text); text-decoration: none; }
+  .bl-search-result-label {
+    margin-top: 16px;
+    font-family: var(--mono); font-size: 11px;
+    color: var(--muted); letter-spacing: 0.08em;
+  }
+  .bl-search-result-label span { color: var(--accent); }
+
+  /* MAIN CONTENT */
+  .bl-main { max-width: 1100px; margin: 0 auto; padding: 80px 48px 120px; }
+
+  /* POST LIST */
+  .bl-post-list { display: flex; flex-direction: column; gap: 2px; background: var(--line); }
+
+  .bl-post-item {
+    background: var(--bg);
+    display: grid;
+    grid-template-columns: 100px 1fr auto;
+    gap: 32px;
+    align-items: start;
+    padding: 36px 32px;
+    text-decoration: none;
+    transition: background 0.2s, padding-left 0.2s;
+    position: relative;
+    overflow: hidden;
+  }
+  .bl-post-item::before {
+    content: '';
+    position: absolute; left: 0; top: 0; bottom: 0;
+    width: 2px; background: var(--accent);
+    transform: scaleY(0); transform-origin: bottom;
+    transition: transform 0.3s;
+  }
+  .bl-post-item:hover { background: var(--bg2); padding-left: 40px; text-decoration: none; }
+  .bl-post-item:hover::before { transform: scaleY(1); }
+
+  .bl-post-date {
+    font-family: var(--mono); font-size: 10px;
+    color: var(--muted2); letter-spacing: 0.08em;
+    text-transform: uppercase; padding-top: 6px;
+    line-height: 1.4;
+  }
+
+  .bl-post-body {}
+  .bl-post-tags { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 10px; }
+  .bl-post-tag {
+    font-family: var(--mono); font-size: 9px;
+    padding: 3px 8px;
+    border: 1px solid var(--muted2);
+    color: var(--muted2); letter-spacing: 0.1em;
+    text-transform: uppercase;
+  }
+  .bl-post-title {
+    font-family: var(--serif);
+    font-size: clamp(18px, 2.5vw, 26px);
+    font-weight: 700; color: var(--text);
+    line-height: 1.2; margin-bottom: 10px;
+    letter-spacing: -0.01em;
+    transition: color 0.2s;
+  }
+  .bl-post-item:hover .bl-post-title { color: var(--accent); }
+  .bl-post-excerpt {
+    font-size: 14px; color: var(--muted);
+    line-height: 1.7; max-width: 560px;
+  }
+
+  .bl-post-meta {
+    display: flex; flex-direction: column;
+    align-items: flex-end; gap: 8px;
+    padding-top: 6px; white-space: nowrap;
+  }
+  .bl-post-readtime {
+    font-family: var(--mono); font-size: 10px;
+    color: var(--muted2); letter-spacing: 0.08em;
+    text-transform: uppercase;
+  }
+  .bl-post-arrow {
+    font-family: var(--mono); font-size: 16px;
+    color: var(--muted2); transition: color 0.2s, transform 0.2s;
+  }
+  .bl-post-item:hover .bl-post-arrow { color: var(--accent); transform: translateX(4px); }
+
+  /* PAGINATION */
+  .bl-pagination {
+    display: flex; align-items: center; justify-content: center;
+    gap: 2px; margin-top: 60px; background: var(--line);
+    width: fit-content; margin-left: auto; margin-right: auto;
+  }
+  .bl-page-btn {
+    font-family: var(--mono); font-size: 12px;
+    padding: 12px 20px;
+    background: var(--bg); color: var(--muted);
+    text-decoration: none; letter-spacing: 0.08em;
+    transition: background 0.2s, color 0.2s;
+    border: none; cursor: pointer;
+  }
+  .bl-page-btn:hover { background: var(--bg2); color: var(--text); text-decoration: none; }
+  .bl-page-btn.active {
+    background: var(--accent); color: #0a0a0a; font-weight: 500;
+  }
+  .bl-page-ellipsis {
+    font-family: var(--mono); font-size: 12px;
+    padding: 12px 16px; color: var(--muted2);
+    background: var(--bg);
+  }
+
+  /* EMPTY STATE */
+  .bl-empty {
+    text-align: center; padding: 80px 0;
+    border: 1px solid var(--line);
+  }
+  .bl-empty-icon {
+    font-family: var(--mono); font-size: 48px;
+    color: var(--muted2); margin-bottom: 24px;
+  }
+  .bl-empty-title {
+    font-family: var(--serif); font-size: 36px;
+    font-weight: 700; color: var(--text);
+    margin-bottom: 12px;
+  }
+  .bl-empty-desc { font-size: 15px; color: var(--muted); margin-bottom: 32px; }
+  .bl-empty-btn {
+    display: inline-flex; align-items: center; gap: 8px;
+    padding: 12px 24px;
+    background: var(--accent); color: #0a0a0a;
+    font-family: var(--mono); font-size: 12px;
+    letter-spacing: 0.08em; text-transform: uppercase;
+    text-decoration: none; transition: box-shadow 0.2s, transform 0.2s;
+  }
+  .bl-empty-btn:hover {
+    transform: translate(-2px,-2px);
+    box-shadow: 4px 4px 0 var(--accent2);
+    text-decoration: none; color: #0a0a0a;
+  }
+
+  /* FOOTER */
+  .bl-footer {
+    border-top: 1px solid var(--line);
+    padding: 32px 48px;
+    display: flex; justify-content: space-between; align-items: center;
+    background: var(--bg);
+  }
+  .bl-footer-left { font-family: var(--mono); font-size: 11px; color: var(--muted2); }
+  .bl-footer-right { font-family: var(--mono); font-size: 11px; color: var(--muted2); }
+  .bl-footer-right a { color: var(--muted2); text-decoration: none; transition: color 0.2s; }
+  .bl-footer-right a:hover { color: var(--accent); }
+
+  /* REVEAL */
+  .sn-reveal { opacity: 0; transform: translateY(24px); transition: opacity 0.6s ease, transform 0.6s ease; }
+  .sn-reveal.visible { opacity: 1; transform: translateY(0); }
+
+  ::selection { background: var(--accent); color: #0a0a0a; }
+
+  @media (max-width: 768px) {
+    #bl-nav { padding: 16px 24px; }
+    .bl-header { padding: 120px 24px 60px; }
+    .bl-header-inner { grid-template-columns: 1fr; gap: 40px; }
+    .bl-main { padding: 48px 24px 80px; }
+    .bl-post-item { grid-template-columns: 1fr; gap: 12px; padding: 24px; }
+    .bl-post-meta { flex-direction: row; align-items: center; }
+    .bl-footer { flex-direction: column; gap: 8px; text-align: center; padding: 24px; }
+  }
+</style>
+
+<div class="cursor" id="blCursor"></div>
+<div class="cursor-ring" id="blRing"></div>
+
+<!-- NAV -->
+<nav id="bl-nav">
+  <a href="{{ url_for('public.home') }}" class="bl-nav-logo">sn<span>.</span>dev</a>
+  <a href="{{ url_for('public.home') }}" class="bl-nav-back">← Home</a>
+</nav>
+
+<!-- HEADER -->
+<div class="bl-header">
+  <div class="bl-header-grid"></div>
+  <div class="bl-header-inner">
+    <div>
+      <div class="bl-header-eyebrow">Writing</div>
+      <h1 class="bl-header-title">Thinking<br><em>out loud.</em></h1>
+    </div>
+    <div class="bl-header-right">
+      <p class="bl-header-desc">
+        Essays on systems, architecture, static analysis, and the lower layers
+        of software most developers never have to think about.
+      </p>
+      <form action="{{ url_for('public.blog_timeline') }}" method="get" class="bl-search-form">
+        <input
+          type="text" name="q"
+          class="bl-search-input"
+          placeholder="Search articles..."
+          value="{{ search_query }}"
+        >
+        {% if search_query %}
+          <a href="{{ url_for('public.blog_timeline') }}" class="bl-search-clear">Clear</a>
+        {% endif %}
+        <button type="submit" class="bl-search-btn">Search</button>
+      </form>
+      {% if search_query %}
+        <p class="bl-search-result-label">
+          Results for "<span>{{ search_query }}</span>"
+        </p>
+      {% endif %}
+    </div>
+  </div>
+</div>
+
+<!-- MAIN -->
+<div class="bl-main">
+  {% if posts %}
+    <div class="bl-post-list sn-reveal">
+      {% for post in posts %}
+        <a href="{{ url_for('public.blog_detail', slug=post.slug) }}" class="bl-post-item">
+          <div class="bl-post-date">
+            {{ post.created_at.strftime('%b %d') }}<br>{{ post.created_at.strftime('%Y') }}
+          </div>
+          <div class="bl-post-body">
+            {% if post.tags %}
+              <div class="bl-post-tags">
+                {% for tag in post.tags %}
+                  <span class="bl-post-tag">{{ tag.name }}</span>
+                {% endfor %}
+              </div>
+            {% endif %}
+            <div class="bl-post-title">{{ post.title }}</div>
+            <div class="bl-post-excerpt">
+              {{ post.markdown_content[:180] }}{% if post.markdown_content|length > 180 %}...{% endif %}
+            </div>
+          </div>
+          <div class="bl-post-meta">
+            <span class="bl-post-readtime">{{ (post.markdown_content|length / 200)|round|int }} min</span>
+            <span class="bl-post-arrow">→</span>
+          </div>
+        </a>
+      {% endfor %}
+    </div>
+
+    <!-- PAGINATION -->
+    {% if pagination.pages > 1 %}
+      <div class="bl-pagination sn-reveal">
+        {% if pagination.has_prev %}
+          <a href="{{ url_for('public.blog_timeline', page=pagination.prev_num, q=search_query) }}" class="bl-page-btn">←</a>
+        {% endif %}
+        {% for page_num in range(1, pagination.pages + 1) %}
+          {% if page_num == pagination.page %}
+            <span class="bl-page-btn active">{{ page_num }}</span>
+          {% elif page_num == 1 or page_num == pagination.pages or (page_num >= pagination.page - 1 and page_num <= pagination.page + 1) %}
+            <a href="{{ url_for('public.blog_timeline', page=page_num, q=search_query) }}" class="bl-page-btn">{{ page_num }}</a>
+          {% elif page_num == pagination.page - 2 or page_num == pagination.page + 2 %}
+            <span class="bl-page-ellipsis">…</span>
+          {% endif %}
+        {% endfor %}
+        {% if pagination.has_next %}
+          <a href="{{ url_for('public.blog_timeline', page=pagination.next_num, q=search_query) }}" class="bl-page-btn">→</a>
+        {% endif %}
+      </div>
+    {% endif %}
+
+  {% else %}
+    <div class="bl-empty sn-reveal">
+      <div class="bl-empty-icon">//</div>
+      <div class="bl-empty-title">
+        {% if search_query %}No results.{% else %}Nothing yet.{% endif %}
+      </div>
+      <p class="bl-empty-desc">
+        {% if search_query %}
+          Try a different term or browse everything.
+        {% else %}
+          Essays are being drafted. Check back soon.
+        {% endif %}
+      </p>
+      {% if search_query %}
+        <a href="{{ url_for('public.blog_timeline') }}" class="bl-empty-btn">View all posts →</a>
+      {% endif %}
+    </div>
+  {% endif %}
+</div>
+
+<!-- FOOTER -->
+<footer class="bl-footer">
+  <div class="bl-footer-left">© 2025 Shreyan Nandanwar</div>
+  <div class="bl-footer-right">
+    <a href="/control-panel-9f2c8a/login">Admin</a>
+  </div>
+</footer>
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700;900&family=JetBrains+Mono:wght@300;400;500&family=Instrument+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+
+<script>
+  const blC = document.getElementById('blCursor');
+  const blR = document.getElementById('blRing');
+  let mx=0,my=0,rx=0,ry=0;
+  document.addEventListener('mousemove', e => {
+    mx=e.clientX; my=e.clientY;
+    blC.style.left=mx-4+'px'; blC.style.top=my-4+'px';
+  });
+  (function anim(){ rx+=(mx-rx)*0.12; ry+=(my-ry)*0.12;
+    blR.style.left=rx-18+'px'; blR.style.top=ry-18+'px';
+    requestAnimationFrame(anim); })();
+  document.querySelectorAll('a,button').forEach(el=>{
+    el.addEventListener('mouseenter',()=>{ blC.style.transform='scale(2.5)'; blR.style.transform='scale(1.4)'; });
+    el.addEventListener('mouseleave',()=>{ blC.style.transform='scale(1)'; blR.style.transform='scale(1)'; });
+  });
+
+  const obs = new IntersectionObserver(entries=>{
+    entries.forEach(e=>{ if(e.isIntersecting){ e.target.classList.add('visible'); obs.unobserve(e.target); }});
+  },{threshold:0.05});
+  document.querySelectorAll('.sn-reveal').forEach(el=>obs.observe(el));
+</script>
+{% endblock %}

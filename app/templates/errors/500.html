@@ -1,0 +1,82 @@
+{% extends "base.html" %}
+
+{% block title %}Server Error - 500{% endblock %}
+
+{% block body %}
+<div class="min-h-screen flex items-center justify-center px-4 bg-gradient-to-br from-red-50 via-orange-50 to-yellow-50 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900">
+    <div class="text-center max-w-2xl mx-auto">
+        <!-- Animated 500 -->
+        <div class="mb-8">
+            <h1 class="text-9xl font-bold bg-gradient-to-r from-red-600 via-orange-600 to-yellow-600 bg-clip-text text-transparent animate-pulse">
+                500
+            </h1>
+        </div>
+        
+        <!-- Icon -->
+        <div class="mb-6">
+            <i class="fas fa-tools text-6xl text-gray-400 dark:text-gray-600"></i>
+        </div>
+        
+        <!-- Message -->
+        <h2 class="text-3xl md:text-4xl font-bold text-gray-900 dark:text-white mb-4">
+            Internal Server Error
+        </h2>
+        
+        <p class="text-lg text-gray-600 dark:text-gray-400 mb-8">
+            Whoops! Something went wrong on our end. Our team has been notified and we're working on it.
+            Please try again in a few moments.
+        </p>
+        
+        <!-- Action Buttons -->
+        <div class="flex flex-col sm:flex-row gap-4 justify-center">
+            <button onclick="location.reload()" class="inline-flex items-center px-8 py-4 bg-gradient-to-r from-primary-600 to-primary-700 hover:from-primary-700 hover:to-primary-800 text-white rounded-xl font-semibold shadow-lg hover:shadow-xl transition-all duration-200 transform hover:-translate-y-0.5">
+                <i class="fas fa-redo mr-2"></i>
+                Try Again
+            </button>
+            
+            <a href="{{ url_for('public.home') }}" class="inline-flex items-center px-8 py-4 bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700 text-gray-900 dark:text-white rounded-xl font-semibold shadow-lg hover:shadow-xl transition-all duration-200 transform hover:-translate-y-0.5 border border-gray-200 dark:border-gray-700">
+                <i class="fas fa-home mr-2"></i>
+                Go Home
+            </a>
+        </div>
+        
+        <!-- Error Code (for developers) -->
+        <div class="mt-12 pt-8 border-t border-gray-200 dark:border-gray-700">
+            <details class="text-left">
+                <summary class="cursor-pointer text-sm text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 transition-colors">
+                    <i class="fas fa-code mr-2"></i>
+                    Technical Details (for developers)
+                </summary>
+                <div class="mt-4 p-4 bg-gray-100 dark:bg-gray-800 rounded-lg">
+                    <p class="text-sm font-mono text-gray-700 dark:text-gray-300">
+                        Error: Internal Server Error<br>
+                        Status Code: 500<br>
+                        <br>
+                        <span class="text-xs text-gray-500 dark:text-gray-400">
+                            This error has been logged and our team will investigate.
+                        </span>
+                    </p>
+                </div>
+            </details>
+        </div>
+    </div>
+</div>
+
+<script>
+    // Auto-reload after 30 seconds
+    setTimeout(function() {
+        if (confirm('Would you like to try reloading the page?')) {
+            location.reload();
+        }
+    }, 30000);
+    
+    // Update theme toggle icon on load
+    window.addEventListener('load', function() {
+        const isDark = document.documentElement.classList.contains('dark');
+        const icon = document.getElementById('theme-toggle-icon');
+        if (icon) {
+            icon.className = isDark ? 'fas fa-sun' : 'fas fa-moon';
+        }
+    });
+</script>
+{% endblock %}

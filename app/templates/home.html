@@ -1,0 +1,1257 @@
+{% extends "base.html" %}
+
+{% block title %}Shreyan Nandanwar — Systems Engineer{% endblock %}
+
+{% block body %}
+
+<style>
+  :root {
+    --bg: #0a0a0a;
+    --bg2: #111111;
+    --bg3: #181818;
+    --line: rgba(255,255,255,0.07);
+    --accent: #e8ff47;
+    --accent2: #47c8ff;
+    --text: #f0ede8;
+    --muted: #666;
+    --muted2: #444;
+    --serif: 'Playfair Display', Georgia, serif;
+    --mono: 'JetBrains Mono', monospace;
+    --sans: 'Instrument Sans', sans-serif;
+  }
+
+  @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700;900&family=JetBrains+Mono:wght@300;400;500&family=Instrument+Sans:wght@300;400;500;600&display=swap');
+
+  body {
+    background: var(--bg) !important;
+    color: var(--text) !important;
+    font-family: var(--sans) !important;
+    overflow-x: hidden;
+    cursor: none;
+  }
+
+  /* Custom cursor */
+  .cursor {
+    width: 8px; height: 8px;
+    background: var(--accent);
+    border-radius: 50%;
+    position: fixed;
+    pointer-events: none;
+    z-index: 9999;
+    transition: transform 0.15s ease;
+    mix-blend-mode: difference;
+  }
+  .cursor-ring {
+    width: 36px; height: 36px;
+    border: 1px solid rgba(232,255,71,0.4);
+    border-radius: 50%;
+    position: fixed;
+    pointer-events: none;
+    z-index: 9998;
+    mix-blend-mode: difference;
+  }
+
+  /* Grain overlay */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='1'/%3E%3C/svg%3E");
+    opacity: 0.025;
+    pointer-events: none;
+    z-index: 9997;
+  }
+
+  /* ─── NAV ─────────────────────────────────────── */
+  #sn-nav {
+    position: fixed;
+    top: 0; left: 0; right: 0;
+    z-index: 100;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 20px 48px;
+    border-bottom: 1px solid transparent;
+    transition: border-color 0.3s, background 0.3s;
+  }
+  #sn-nav.scrolled {
+    border-color: var(--line);
+    background: rgba(10,10,10,0.92);
+    backdrop-filter: blur(12px);
+  }
+  .sn-nav-logo {
+    font-family: var(--mono);
+    font-size: 13px;
+    color: var(--muted);
+    letter-spacing: 0.05em;
+    text-decoration: none;
+  }
+  .sn-nav-logo span { color: var(--accent); }
+  .sn-nav-links {
+    display: flex;
+    gap: 32px;
+    list-style: none;
+    margin: 0; padding: 0;
+  }
+  .sn-nav-links a {
+    font-family: var(--mono);
+    font-size: 11px;
+    color: var(--muted);
+    text-decoration: none;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    transition: color 0.2s;
+  }
+  .sn-nav-links a:hover { color: var(--text); }
+  .sn-mobile-btn {
+    display: none;
+    background: none;
+    border: 1px solid var(--muted2);
+    color: var(--muted);
+    padding: 8px 12px;
+    cursor: pointer;
+    font-family: var(--mono);
+    font-size: 11px;
+    letter-spacing: 0.1em;
+  }
+  .sn-mobile-menu {
+    display: none;
+    position: fixed;
+    top: 61px; left: 0; right: 0;
+    background: rgba(10,10,10,0.97);
+    border-bottom: 1px solid var(--line);
+    padding: 24px 48px;
+    z-index: 99;
+    backdrop-filter: blur(12px);
+  }
+  .sn-mobile-menu.open { display: block; }
+  .sn-mobile-menu a {
+    display: block;
+    font-family: var(--mono);
+    font-size: 13px;
+    color: var(--muted);
+    text-decoration: none;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    padding: 12px 0;
+    border-bottom: 1px solid var(--line);
+    transition: color 0.2s;
+  }
+  .sn-mobile-menu a:hover { color: var(--text); }
+
+  /* ─── HERO ────────────────────────────────────── */
+  #home {
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    padding: 0 48px;
+    position: relative;
+    overflow: hidden;
+  }
+  .hero-grid-bg {
+    position: absolute;
+    inset: 0;
+    background-image:
+      linear-gradient(var(--line) 1px, transparent 1px),
+      linear-gradient(90deg, var(--line) 1px, transparent 1px);
+    background-size: 80px 80px;
+    mask-image: radial-gradient(ellipse 80% 60% at 50% 50%, black, transparent);
+    -webkit-mask-image: radial-gradient(ellipse 80% 60% at 50% 50%, black, transparent);
+  }
+  .hero-inner {
+    max-width: 1100px;
+    margin: 0 auto;
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    padding-top: 120px;
+    padding-bottom: 80px;
+    position: relative;
+    z-index: 1;
+  }
+  .hero-eyebrow {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 40px;
+    opacity: 0;
+    animation: snFadeUp 0.8s ease forwards;
+  }
+  .hero-eyebrow-tag {
+    font-family: var(--mono);
+    font-size: 11px;
+    color: var(--muted);
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+  }
+  .hero-eyebrow-line { width: 40px; height: 1px; background: var(--muted2); }
+  .sn-status-dot {
+    display: flex; align-items: center; gap: 6px;
+    font-family: var(--mono);
+    font-size: 11px;
+    color: var(--muted);
+  }
+  .sn-status-dot::before {
+    content: '';
+    width: 6px; height: 6px;
+    background: #4ade80;
+    border-radius: 50%;
+    box-shadow: 0 0 8px #4ade80;
+    animation: snPulse 2s infinite;
+  }
+  @keyframes snPulse { 0%,100% { opacity:1; } 50% { opacity:0.4; } }
+
+  .hero-name {
+    font-family: var(--serif);
+    font-size: clamp(52px, 8vw, 110px);
+    font-weight: 900;
+    line-height: 0.95;
+    letter-spacing: -0.02em;
+    color: var(--text);
+    margin-bottom: 24px;
+    opacity: 0;
+    animation: snFadeUp 0.8s 0.1s ease forwards;
+  }
+  .hero-name em { font-style: italic; color: var(--accent); }
+
+  .hero-descriptor {
+    margin-bottom: 48px;
+    opacity: 0;
+    animation: snFadeUp 0.8s 0.2s ease forwards;
+  }
+  .hero-descriptor-text {
+    font-family: var(--sans);
+    font-size: clamp(16px, 2vw, 22px);
+    font-weight: 300;
+    color: var(--muted);
+    max-width: 560px;
+    line-height: 1.5;
+  }
+  .hero-descriptor-text strong { color: var(--text); font-weight: 500; }
+
+  .hero-manifesto {
+    border-left: 2px solid var(--accent);
+    padding: 16px 24px;
+    margin-bottom: 56px;
+    max-width: 600px;
+    background: rgba(232,255,71,0.03);
+    opacity: 0;
+    animation: snFadeUp 0.8s 0.3s ease forwards;
+  }
+  .hero-manifesto p {
+    font-family: var(--mono);
+    font-size: 13px;
+    color: var(--muted);
+    line-height: 1.7;
+  }
+  .hero-manifesto p strong { color: var(--text); }
+
+  .hero-actions {
+    display: flex;
+    gap: 16px;
+    align-items: center;
+    flex-wrap: wrap;
+    opacity: 0;
+    animation: snFadeUp 0.8s 0.4s ease forwards;
+  }
+  .sn-btn-primary {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    padding: 14px 28px;
+    background: var(--accent);
+    color: #0a0a0a;
+    font-family: var(--mono);
+    font-size: 12px;
+    font-weight: 500;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    text-decoration: none;
+    transition: transform 0.2s, box-shadow 0.2s;
+  }
+  .sn-btn-primary:hover {
+    transform: translate(-2px, -2px);
+    box-shadow: 4px 4px 0 var(--accent2);
+    color: #0a0a0a;
+    text-decoration: none;
+  }
+  .sn-btn-ghost {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    padding: 14px 28px;
+    border: 1px solid var(--muted2);
+    color: var(--muted);
+    font-family: var(--mono);
+    font-size: 12px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    text-decoration: none;
+    transition: border-color 0.2s, color 0.2s;
+  }
+  .sn-btn-ghost:hover { border-color: var(--text); color: var(--text); text-decoration: none; }
+
+  .hero-scroll-hint {
+    position: absolute;
+    bottom: 40px; left: 48px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    opacity: 0;
+    animation: snFadeUp 0.8s 0.6s ease forwards;
+  }
+  .scroll-line {
+    width: 1px; height: 60px;
+    background: linear-gradient(to bottom, transparent, var(--muted2));
+    animation: snScrollLine 2s ease-in-out infinite;
+  }
+  @keyframes snScrollLine {
+    0% { transform: scaleY(0); transform-origin: top; }
+    50% { transform: scaleY(1); transform-origin: top; }
+    51% { transform: scaleY(1); transform-origin: bottom; }
+    100% { transform: scaleY(0); transform-origin: bottom; }
+  }
+  .scroll-label {
+    font-family: var(--mono);
+    font-size: 10px;
+    color: var(--muted2);
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    writing-mode: vertical-lr;
+  }
+  .hero-location {
+    position: absolute;
+    right: 48px; bottom: 40px;
+    font-family: var(--mono);
+    font-size: 11px;
+    color: var(--muted2);
+    opacity: 0;
+    animation: snFadeUp 0.8s 0.6s ease forwards;
+  }
+
+  /* ─── SECTION SHARED ──────────────────────────── */
+  .sn-section-inner {
+    max-width: 1100px;
+    margin: 0 auto;
+    padding: 0 48px;
+  }
+  .sn-section-header {
+    display: grid;
+    grid-template-columns: 120px 1fr;
+    gap: 32px;
+    align-items: start;
+    margin-bottom: 64px;
+    padding-top: 120px;
+  }
+  .sn-section-num {
+    font-family: var(--mono);
+    font-size: 11px;
+    color: var(--muted2);
+    letter-spacing: 0.1em;
+    padding-top: 10px;
+    border-top: 1px solid var(--muted2);
+  }
+  .sn-section-title {
+    font-family: var(--serif);
+    font-size: clamp(36px, 5vw, 64px);
+    font-weight: 700;
+    line-height: 1.0;
+    letter-spacing: -0.02em;
+    color: var(--text);
+  }
+  .sn-section-title em { font-style: italic; color: var(--accent); }
+  .sn-divider {
+    border: none;
+    border-top: 1px solid var(--line);
+    max-width: 1100px;
+    margin: 0 auto;
+  }
+
+  /* ─── ABOUT ───────────────────────────────────── */
+  #about { padding-bottom: 120px; background: var(--bg); }
+  .about-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 80px;
+    align-items: start;
+  }
+  .about-story p {
+    font-size: 17px;
+    line-height: 1.8;
+    color: #a0998f;
+    margin-bottom: 20px;
+  }
+  .about-story p strong { color: var(--text); font-weight: 500; }
+  .about-story p .sn-highlight { color: var(--accent); font-style: italic; }
+  .about-right { display: flex; flex-direction: column; gap: 40px; }
+  .sn-trait-card {
+    padding: 24px;
+    border: 1px solid var(--line);
+    background: var(--bg2);
+    position: relative;
+    overflow: hidden;
+    transition: border-color 0.3s;
+  }
+  .sn-trait-card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0;
+    width: 3px; height: 100%;
+    background: var(--accent);
+    transform: scaleY(0);
+    transform-origin: bottom;
+    transition: transform 0.3s;
+  }
+  .sn-trait-card:hover { border-color: var(--accent2); }
+  .sn-trait-card:hover::before { transform: scaleY(1); }
+  .sn-trait-label {
+    font-family: var(--mono);
+    font-size: 10px;
+    color: var(--accent);
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    margin-bottom: 8px;
+  }
+  .sn-trait-text { font-size: 14px; color: var(--muted); line-height: 1.7; }
+  .sn-skills-block { margin-top: 16px; }
+  .sn-skills-label {
+    font-family: var(--mono);
+    font-size: 10px;
+    color: var(--muted2);
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    margin-bottom: 16px;
+  }
+  .sn-skills-row { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 12px; }
+  .sn-skill-tag {
+    font-family: var(--mono);
+    font-size: 11px;
+    padding: 5px 12px;
+    border: 1px solid var(--muted2);
+    color: var(--muted);
+    letter-spacing: 0.05em;
+    transition: all 0.2s;
+    background: none;
+  }
+  .sn-skill-tag:hover { border-color: var(--accent); color: var(--accent); }
+  .sn-skill-tag.core {
+    border-color: var(--accent2);
+    color: var(--accent2);
+    background: rgba(71,200,255,0.05);
+  }
+
+  /* ─── PROJECTS ────────────────────────────────── */
+  #projects { padding-bottom: 120px; background: var(--bg); }
+  .sn-project-item {
+    display: grid;
+    grid-template-columns: 120px 1fr;
+    gap: 32px;
+    padding: 48px 0;
+    border-bottom: 1px solid var(--line);
+    position: relative;
+  }
+  .sn-project-item:first-of-type { border-top: 1px solid var(--line); }
+  .sn-project-meta { padding-top: 4px; }
+  .sn-project-num {
+    font-family: var(--mono);
+    font-size: 11px;
+    color: var(--muted2);
+    letter-spacing: 0.1em;
+    margin-bottom: 12px;
+  }
+  .sn-project-stack { display: flex; flex-direction: column; gap: 4px; }
+  .sn-stack-item { font-family: var(--mono); font-size: 10px; color: var(--muted2); }
+  .sn-project-top {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 20px;
+  }
+  .sn-project-name {
+    font-family: var(--serif);
+    font-size: clamp(24px, 3vw, 38px);
+    font-weight: 700;
+    color: var(--text);
+    letter-spacing: -0.01em;
+    line-height: 1.1;
+  }
+  .sn-project-year { font-family: var(--mono); font-size: 11px; color: var(--muted2); padding-top: 4px; }
+  .sn-project-problem {
+    font-family: var(--mono);
+    font-size: 12px;
+    color: var(--accent);
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    margin-bottom: 12px;
+  }
+  .sn-project-desc {
+    font-size: 15px;
+    color: #888;
+    line-height: 1.8;
+    margin-bottom: 28px;
+    max-width: 620px;
+  }
+  .sn-project-desc strong { color: var(--text); font-weight: 500; }
+  .sn-project-insight {
+    padding: 16px 20px;
+    background: var(--bg3);
+    border-left: 2px solid var(--accent2);
+    margin-bottom: 28px;
+    max-width: 560px;
+  }
+  .sn-insight-label {
+    font-family: var(--mono);
+    font-size: 9px;
+    color: var(--accent2);
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    margin-bottom: 6px;
+  }
+  .sn-project-insight p { font-size: 13px; color: var(--muted); line-height: 1.6; font-style: italic; }
+  .sn-project-metrics { display: flex; gap: 24px; flex-wrap: wrap; }
+  .sn-metric { display: flex; flex-direction: column; gap: 2px; }
+  .sn-metric-val { font-family: var(--mono); font-size: 20px; font-weight: 500; color: var(--text); }
+  .sn-metric-val .unit { font-size: 12px; color: var(--muted); }
+  .sn-metric-label {
+    font-family: var(--mono);
+    font-size: 10px;
+    color: var(--muted2);
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+  }
+  .sn-project-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-family: var(--mono);
+    font-size: 11px;
+    color: var(--muted2);
+    text-decoration: none;
+    letter-spacing: 0.08em;
+    margin-top: 20px;
+    transition: color 0.2s;
+  }
+  .sn-project-link:hover { color: var(--accent); text-decoration: none; }
+
+  /* ─── GITHUB REPOS ────────────────────────────── */
+  #other-work { padding-bottom: 120px; background: var(--bg); }
+  .sn-repos-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 2px;
+    background: var(--line);
+    margin-bottom: 40px;
+  }
+  .sn-repo-card {
+    background: var(--bg);
+    padding: 28px;
+    text-decoration: none;
+    display: block;
+    transition: background 0.2s;
+  }
+  .sn-repo-card:hover { background: var(--bg2); text-decoration: none; }
+  .sn-repo-name {
+    font-family: var(--sans);
+    font-size: 15px;
+    font-weight: 600;
+    color: var(--text);
+    margin-bottom: 8px;
+    transition: color 0.2s;
+  }
+  .sn-repo-card:hover .sn-repo-name { color: var(--accent); }
+  .sn-repo-desc { font-size: 13px; color: var(--muted); line-height: 1.6; margin-bottom: 16px; }
+  .sn-repo-meta {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    font-family: var(--mono);
+    font-size: 10px;
+    color: var(--muted2);
+    letter-spacing: 0.05em;
+  }
+  .sn-repo-lang { display: flex; align-items: center; gap: 6px; }
+  .sn-repo-lang-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--accent2); }
+  .sn-repo-stats { display: flex; gap: 12px; }
+
+  /* ─── WRITING ─────────────────────────────────── */
+  #writing { padding-bottom: 120px; background: var(--bg); }
+  .sn-writing-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 2px;
+    background: var(--line);
+    margin-bottom: 40px;
+  }
+  .sn-writing-card {
+    background: var(--bg);
+    padding: 32px;
+    transition: background 0.2s;
+    text-decoration: none;
+    display: block;
+  }
+  .sn-writing-card:hover { background: var(--bg2); }
+  .sn-writing-date {
+    font-family: var(--mono);
+    font-size: 10px;
+    color: var(--muted2);
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    margin-bottom: 12px;
+  }
+  .sn-writing-title {
+    font-family: var(--serif);
+    font-size: 20px;
+    color: var(--text);
+    line-height: 1.3;
+    margin-bottom: 12px;
+    font-weight: 700;
+  }
+  .sn-writing-excerpt { font-size: 14px; color: var(--muted); line-height: 1.6; }
+  .sn-writing-tag {
+    display: inline-block;
+    margin-top: 16px;
+    font-family: var(--mono);
+    font-size: 10px;
+    color: var(--accent2);
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+  }
+  .sn-writing-cta {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    font-family: var(--mono);
+    font-size: 12px;
+    color: var(--muted);
+  }
+  .sn-writing-cta a {
+    color: var(--accent);
+    text-decoration: none;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    transition: gap 0.2s;
+  }
+  .sn-writing-cta a:hover { gap: 12px; }
+
+  /* ─── CONTACT ─────────────────────────────────── */
+  #contact { padding-bottom: 120px; background: var(--bg); border-top: 1px solid var(--line); }
+  .sn-contact-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 80px;
+    align-items: center;
+  }
+  .sn-contact-headline {
+    font-family: var(--serif);
+    font-size: clamp(36px, 5vw, 72px);
+    font-weight: 900;
+    line-height: 0.95;
+    color: var(--text);
+    letter-spacing: -0.02em;
+    margin-bottom: 24px;
+  }
+  .sn-contact-headline em { font-style: italic; color: var(--accent); }
+  .sn-contact-subtext { font-size: 15px; color: var(--muted); line-height: 1.7; max-width: 400px; }
+  .sn-contact-links { display: flex; flex-direction: column; gap: 2px; background: var(--line); }
+  .sn-contact-link {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 20px 24px;
+    background: var(--bg);
+    text-decoration: none;
+    transition: background 0.2s, padding-left 0.2s;
+  }
+  .sn-contact-link:hover { background: var(--bg2); padding-left: 32px; text-decoration: none; }
+  .sn-contact-link-label {
+    font-family: var(--mono);
+    font-size: 12px;
+    color: var(--muted);
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    transition: color 0.2s;
+  }
+  .sn-contact-link:hover .sn-contact-link-label { color: var(--text); }
+  .sn-contact-arrow { font-family: var(--mono); font-size: 14px; color: var(--accent); }
+
+  /* ─── FOOTER ──────────────────────────────────── */
+  #sn-footer {
+    border-top: 1px solid var(--line);
+    padding: 32px 48px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: var(--bg);
+  }
+  .sn-footer-left { font-family: var(--mono); font-size: 11px; color: var(--muted2); letter-spacing: 0.05em; }
+  .sn-footer-right { font-family: var(--mono); font-size: 11px; color: var(--muted2); letter-spacing: 0.05em; }
+  .sn-footer-right span { color: var(--accent); }
+
+  /* ─── ANIMATIONS ──────────────────────────────── */
+  @keyframes snFadeUp {
+    from { opacity: 0; transform: translateY(24px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  .sn-reveal {
+    opacity: 0;
+    transform: translateY(32px);
+    transition: opacity 0.7s ease, transform 0.7s ease;
+  }
+  .sn-reveal.visible { opacity: 1; transform: translateY(0); }
+
+  ::selection { background: var(--accent); color: #0a0a0a; }
+
+  /* ─── MOBILE ──────────────────────────────────── */
+  @media (max-width: 768px) {
+    #sn-nav { padding: 16px 24px; }
+    .sn-nav-links { display: none; }
+    .sn-mobile-btn { display: block; }
+    #home, .sn-section-inner { padding-left: 24px; padding-right: 24px; }
+    .sn-section-header { grid-template-columns: 1fr; gap: 12px; }
+    .sn-section-num { border-top: none; padding-top: 0; }
+    .about-grid { grid-template-columns: 1fr; gap: 48px; }
+    .sn-project-item { grid-template-columns: 1fr; gap: 16px; }
+    .sn-repos-grid { grid-template-columns: 1fr; }
+    .sn-writing-grid { grid-template-columns: 1fr; }
+    .sn-contact-grid { grid-template-columns: 1fr; gap: 48px; }
+    #sn-footer { flex-direction: column; gap: 8px; text-align: center; padding: 24px; }
+    .hero-scroll-hint, .hero-location { display: none; }
+    .sn-mobile-menu { padding: 16px 24px; top: 57px; }
+  }
+</style>
+
+<!-- Cursor -->
+<div class="cursor" id="snCursor"></div>
+<div class="cursor-ring" id="snCursorRing"></div>
+
+<!-- ─── NAV ──────────────────────────────────────── -->
+<nav id="sn-nav">
+  <a href="#home" class="sn-nav-logo">sn<span>.</span>dev</a>
+  <ul class="sn-nav-links">
+    <li><a href="#about">About</a></li>
+    <li><a href="#projects">Projects</a></li>
+    <li><a href="{{ url_for('public.blog_timeline') }}">Writing</a></li>
+    <li><a href="#contact">Contact</a></li>
+  </ul>
+  <button class="sn-mobile-btn" onclick="document.getElementById('snMobileMenu').classList.toggle('open')">Menu</button>
+</nav>
+<div id="snMobileMenu" class="sn-mobile-menu">
+  <a href="#about">About</a>
+  <a href="#projects">Projects</a>
+  <a href="{{ url_for('public.blog_timeline') }}">Writing</a>
+  <a href="#contact">Contact</a>
+</div>
+
+<!-- ─── HERO ─────────────────────────────────────── -->
+<section id="home">
+  <div class="hero-grid-bg"></div>
+  <div class="hero-inner">
+
+    <div class="hero-eyebrow">
+      <span class="hero-eyebrow-tag">Shreyan Nandanwar</span>
+      <div class="hero-eyebrow-line"></div>
+      <div class="sn-status-dot">Available — Summer 2026</div>
+    </div>
+
+    <h1 class="hero-name">
+      I think in<br><em>systems.</em>
+    </h1>
+
+    <div class="hero-descriptor">
+      <p class="hero-descriptor-text">
+        Self-taught engineer building at the intersection of
+        <strong>static analysis</strong>, <strong>backend architecture</strong>,
+        and <strong>developer tooling</strong>. Every project is designed to last — not just to ship.
+      </p>
+    </div>
+
+    <div class="hero-manifesto">
+      <p>
+        "The industry over-optimizes for <strong>speed of delivery</strong> at the cost of architectural clarity.
+        I build the other way — understanding the lower layers first,
+        so when things break, I know exactly why."
+      </p>
+    </div>
+
+    <div class="hero-actions">
+      <a href="#projects" class="sn-btn-primary">See the work →</a>
+      <a href="{{ url_for('public.blog_timeline') }}" class="sn-btn-ghost">Read my writing</a>
+    </div>
+
+  </div>
+  <div class="hero-scroll-hint">
+    <div class="scroll-line"></div>
+    <span class="scroll-label">Scroll</span>
+  </div>
+  <div class="hero-location">Nagpur, IN</div>
+</section>
+
+<!-- ─── ABOUT ─────────────────────────────────────── -->
+<section id="about">
+  <div class="sn-section-inner">
+    <div class="sn-section-header sn-reveal">
+      <div class="sn-section-num">01 / About</div>
+      <h2 class="sn-section-title">Not just<br>a <em>developer.</em></h2>
+    </div>
+
+    <div class="about-grid">
+      <div class="about-story sn-reveal">
+        <p>
+          I didn't start coding because of a bootcamp or a career pivot.
+          I gravitated toward it — pulled by the feeling that
+          <strong>building something functional from nothing</strong>
+          is one of the few activities that rewards obsessive thinking.
+        </p>
+        <p>
+          What stuck wasn't just writing code. It was realizing that
+          <strong>the way you structure a system matters more than the code inside it.</strong>
+          I got hooked on architecture — on the idea that the right abstraction
+          at the right level creates leverage you can't buy with more engineers.
+        </p>
+        <p>
+          I naturally think about <strong>extensibility, performance tradeoffs,
+          and long-term structure</strong> — even in small side projects.
+          I design them like production systems because
+          <span class="sn-highlight">the practice of building seriously
+          is the only way to build well.</span>
+        </p>
+        <p>
+          Off the keyboard, I treat everything like a system optimization problem —
+          my workspace, my file structure, my trip planning. The obsessive organizing
+          probably explains why I build structured tools for a living.
+        </p>
+        <p>
+          Currently seeking <strong>Summer 2026 internships</strong> in backend engineering,
+          systems design, or developer tooling — ideally at companies that care about
+          the lower layers: Oracle, the Linux Foundation, or similar.
+        </p>
+      </div>
+
+      <div class="about-right sn-reveal">
+        <div class="sn-trait-card">
+          <div class="sn-trait-label">// Superpower</div>
+          <div class="sn-trait-text">
+            Systems-oriented thinking. When I look at a codebase, I'm mapping
+            its architecture — where the coupling is, what will break under load,
+            what the abstraction boundaries are trying to say.
+          </div>
+        </div>
+        <div class="sn-trait-card">
+          <div class="sn-trait-label">// Conviction</div>
+          <div class="sn-trait-text">
+            Understanding lower layers makes you a better engineer at every layer above.
+            I'd rather understand why TCP keeps order than just know that it does.
+          </div>
+        </div>
+        <div class="sn-trait-card">
+          <div class="sn-trait-label">// Currently exploring</div>
+          <div class="sn-trait-text">
+            Hybrid static + semantic code analysis. Tools that understand code
+            <em>architecturally</em>, not just syntactically — finding risks that
+            linters and embeddings both miss independently.
+          </div>
+        </div>
+        <div class="sn-skills-block">
+          <div class="sn-skills-label">// Deep confidence in</div>
+          <div class="sn-skills-row">
+            <span class="sn-skill-tag core">Static Analysis</span>
+            <span class="sn-skill-tag core">Backend Architecture</span>
+            <span class="sn-skill-tag core">Algorithmic Reasoning</span>
+          </div>
+          <div class="sn-skills-label" style="margin-top:16px;">// Working tools</div>
+          <div class="sn-skills-row">
+            <span class="sn-skill-tag">Rust</span>
+            <span class="sn-skill-tag">Python</span>
+            <span class="sn-skill-tag">Flask</span>
+            <span class="sn-skill-tag">PostgreSQL</span>
+            <span class="sn-skill-tag">Docker</span>
+            <span class="sn-skill-tag">Kubernetes</span>
+            <span class="sn-skill-tag">Tree-sitter</span>
+            <span class="sn-skill-tag">Redis</span>
+            <span class="sn-skill-tag">Terraform</span>
+            <span class="sn-skill-tag">Java</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<hr class="sn-divider">
+
+<!-- ─── PROJECTS ──────────────────────────────────── -->
+<section id="projects">
+  <div class="sn-section-inner">
+    <div class="sn-section-header sn-reveal">
+      <div class="sn-section-num">02 / Work</div>
+      <h2 class="sn-section-title">Things I<br><em>built</em> seriously.</h2>
+    </div>
+
+    <!-- P.01: Code Intelligence Engine -->
+    <div class="sn-project-item sn-reveal">
+      <div class="sn-project-meta">
+        <div class="sn-project-num">P.01</div>
+        <div class="sn-project-stack">
+          <span class="sn-stack-item">Rust</span>
+          <span class="sn-stack-item">Python</span>
+          <span class="sn-stack-item">Tree-sitter</span>
+          <span class="sn-stack-item">LangGraph</span>
+          <span class="sn-stack-item">FAISS</span>
+        </div>
+      </div>
+      <div class="sn-project-content">
+        <div class="sn-project-top">
+          <h3 class="sn-project-name">Code Intelligence<br>Engine</h3>
+          <span class="sn-project-year">2025</span>
+        </div>
+        <div class="sn-project-problem">The gap no tool was filling</div>
+        <p class="sn-project-desc">
+          Most code quality tools do one of two things: lint surface-level style,
+          or embed code into vectors and hope semantic similarity catches real problems.
+          Neither understands <strong>architecture</strong>. I built a Rust CLI that
+          combines AST traversal via Tree-sitter with semantic reasoning —
+          detecting structural risks that exist between modules, not just inside them.
+        </p>
+        <div class="sn-project-insight">
+          <div class="sn-insight-label">// Hardest decision</div>
+          <p>
+            Static-only vs hybrid analysis. Choosing the indexing granularity that preserves
+            structural context without blowing up memory. Early rules were too coupled
+            to traversal logic — I redesigned around a clean rule abstraction layer
+            so extension became additive, not surgical.
+          </p>
+        </div>
+        <div class="sn-project-metrics">
+          <div class="sn-metric">
+            <span class="sn-metric-val">__K <span class="unit">LOC</span></span>
+            <span class="sn-metric-label">parsed / run</span>
+          </div>
+          <div class="sn-metric">
+            <span class="sn-metric-val">__<span class="unit">ms</span></span>
+            <span class="sn-metric-label">avg analysis time</span>
+          </div>
+          <div class="sn-metric">
+            <span class="sn-metric-val">__<span class="unit">MB</span></span>
+            <span class="sn-metric-label">peak memory</span>
+          </div>
+          <div class="sn-metric">
+            <span class="sn-metric-val">__</span>
+            <span class="sn-metric-label">risk categories</span>
+          </div>
+        </div>
+        <a href="https://github.com/shreyannandanwar" target="_blank" class="sn-project-link">
+          View on GitHub →
+        </a>
+      </div>
+    </div>
+
+    <!-- P.02: Portfolio CMS -->
+    <div class="sn-project-item sn-reveal">
+      <div class="sn-project-meta">
+        <div class="sn-project-num">P.02</div>
+        <div class="sn-project-stack">
+          <span class="sn-stack-item">Python</span>
+          <span class="sn-stack-item">Flask</span>
+          <span class="sn-stack-item">PostgreSQL</span>
+          <span class="sn-stack-item">GitHub API</span>
+        </div>
+      </div>
+      <div class="sn-project-content">
+        <div class="sn-project-top">
+          <h3 class="sn-project-name">Portfolio CMS</h3>
+          <span class="sn-project-year">2025</span>
+        </div>
+        <div class="sn-project-problem">WordPress was overkill. Markdown was too raw.</div>
+        <p class="sn-project-desc">
+          I needed a place to exhibit work, not just display it. So I built a
+          <strong>production-ready CMS from scratch</strong>: admin panel, blog engine,
+          GitHub repo sync, security headers, and a cache layer.
+          The goal wasn't to avoid existing tools — it was to understand every layer
+          of the stack that usually gets hidden behind them.
+          <em>You're reading it right now.</em>
+        </p>
+        <div class="sn-project-insight">
+          <div class="sn-insight-label">// Hardest decision</div>
+          <p>
+            GitHub's API rate limits mean you can't fetch repo data on every visit.
+            I designed an internal cache with a manual refresh trigger —
+            understanding the tradeoff between data freshness and API budget.
+            Small problem, real production concern.
+          </p>
+        </div>
+        <div class="sn-project-metrics">
+          <div class="sn-metric">
+            <span class="sn-metric-val">~80<span class="unit">%</span></span>
+            <span class="sn-metric-label">fewer manual updates</span>
+          </div>
+          <div class="sn-metric">
+            <span class="sn-metric-val">70<span class="unit">%+</span></span>
+            <span class="sn-metric-label">test coverage</span>
+          </div>
+          <div class="sn-metric">
+            <span class="sn-metric-val">CSP<span class="unit">+</span>HSTS</span>
+            <span class="sn-metric-label">security headers</span>
+          </div>
+        </div>
+        <a href="https://github.com/shreyannandanwar" target="_blank" class="sn-project-link">
+          View on GitHub →
+        </a>
+      </div>
+    </div>
+
+    <!-- P.03: CloudShrink -->
+    <div class="sn-project-item sn-reveal">
+      <div class="sn-project-meta">
+        <div class="sn-project-num">P.03</div>
+        <div class="sn-project-stack">
+          <span class="sn-stack-item">Kubernetes</span>
+          <span class="sn-stack-item">Docker</span>
+          <span class="sn-stack-item">Terraform</span>
+          <span class="sn-stack-item">Redis</span>
+          <span class="sn-stack-item">Java</span>
+        </div>
+      </div>
+      <div class="sn-project-content">
+        <div class="sn-project-top">
+          <h3 class="sn-project-name">CloudShrink</h3>
+          <span class="sn-project-year">2024</span>
+        </div>
+        <div class="sn-project-problem">Beginner cloud projects don't reflect real production</div>
+        <p class="sn-project-desc">
+          A URL shortener is a solved problem. I chose it deliberately —
+          because the function is trivial, the architecture isn't.
+          I built it as <strong>microservices on Kubernetes with Terraform-provisioned infrastructure</strong>
+          to understand observability, scaling, and cost management
+          without the distraction of a complex domain.
+        </p>
+        <div class="sn-project-insight">
+          <div class="sn-insight-label">// Hardest decision</div>
+          <p>
+            Monolith vs microservices. I chose microservices knowing it increased operational complexity —
+            because that complexity was the point. Retrospectively, I'd collapse certain services
+            in a real production startup. Architectural purity and operational pragmatism
+            aren't always the same goal.
+          </p>
+        </div>
+        <div class="sn-project-metrics">
+          <div class="sn-metric">
+            <span class="sn-metric-val">&lt;80<span class="unit">ms</span></span>
+            <span class="sn-metric-label">avg redirect latency</span>
+          </div>
+          <div class="sn-metric">
+            <span class="sn-metric-val">__<span class="unit">rps</span></span>
+            <span class="sn-metric-label">handled locally</span>
+          </div>
+          <div class="sn-metric">
+            <span class="sn-metric-val">80<span class="unit">%</span></span>
+            <span class="sn-metric-label">cache hit rate</span>
+          </div>
+        </div>
+        <a href="https://github.com/shreyannandanwar" target="_blank" class="sn-project-link">
+          View on GitHub →
+        </a>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<hr class="sn-divider">
+
+<!-- ─── GITHUB REPOS (preserved from original) ───── -->
+{% if featured_repos %}
+<section id="other-work">
+  <div class="sn-section-inner">
+    <div class="sn-section-header sn-reveal">
+      <div class="sn-section-num">03 / OSS</div>
+      <h2 class="sn-section-title">Other<br><em>work.</em></h2>
+    </div>
+
+    <div class="sn-repos-grid sn-reveal">
+      {% for repo in featured_repos %}
+      <a href="{{ repo.url }}" target="_blank" class="sn-repo-card">
+        <div class="sn-repo-name">{{ repo.name }}</div>
+        {% if repo.description %}
+          <div class="sn-repo-desc">{{ repo.description }}</div>
+        {% else %}
+          <div class="sn-repo-desc" style="font-style:italic;color:var(--muted2);">No description</div>
+        {% endif %}
+        <div class="sn-repo-meta">
+          <div class="sn-repo-lang">
+            {% if repo.language %}
+              <span class="sn-repo-lang-dot"></span>
+              <span>{{ repo.language }}</span>
+            {% endif %}
+          </div>
+          <div class="sn-repo-stats">
+            <span>★ {{ repo.stars }}</span>
+            <span>⑂ {{ repo.forks }}</span>
+          </div>
+        </div>
+      </a>
+      {% endfor %}
+    </div>
+
+    {% if github_data and github_data.user_stats %}
+    <div class="sn-reveal" style="margin-top:8px;">
+      <a href="{{ github_data.user_stats.profile_url }}" target="_blank" class="sn-btn-ghost">
+        View all on GitHub →
+      </a>
+    </div>
+    {% endif %}
+  </div>
+</section>
+
+<hr class="sn-divider">
+{% endif %}
+
+<!-- ─── WRITING ────────────────────────────────────── -->
+<section id="writing">
+  <div class="sn-section-inner">
+    <div class="sn-section-header sn-reveal">
+      <div class="sn-section-num">{% if featured_repos %}04{% else %}03{% endif %} / Writing</div>
+      <h2 class="sn-section-title">How I<br><em>think</em> out loud.</h2>
+    </div>
+
+    <div class="sn-writing-grid sn-reveal">
+      <a href="{{ url_for('public.blog_timeline') }}" class="sn-writing-card">
+        <div class="sn-writing-date">Coming soon</div>
+        <div class="sn-writing-title">Why I combine static analysis with semantic search — and what each misses alone</div>
+        <div class="sn-writing-excerpt">
+          Tree-sitter gives you structure. Embeddings give you context.
+          Neither alone tells you whether your architecture is healthy.
+        </div>
+        <span class="sn-writing-tag">// Developer Tooling</span>
+      </a>
+      <a href="{{ url_for('public.blog_timeline') }}" class="sn-writing-card">
+        <div class="sn-writing-date">Coming soon</div>
+        <div class="sn-writing-title">The case for building your own CMS instead of using WordPress</div>
+        <div class="sn-writing-excerpt">
+          Not because it's faster. Because the things you learn about caching,
+          rate limits, and auth are worth more than the time you save.
+        </div>
+        <span class="sn-writing-tag">// Backend Engineering</span>
+      </a>
+    </div>
+
+    <div class="sn-writing-cta sn-reveal">
+      <span>More essays on systems, architecture, and the lower layers.</span>
+      <a href="{{ url_for('public.blog_timeline') }}">Visit the blog →</a>
+    </div>
+  </div>
+</section>
+
+<hr class="sn-divider">
+
+<!-- ─── CONTACT ───────────────────────────────────── -->
+<section id="contact">
+  <div class="sn-section-inner">
+    <div class="sn-section-header sn-reveal">
+      <div class="sn-section-num">{% if featured_repos %}05{% else %}04{% endif %} / Contact</div>
+      <h2 class="sn-section-title">Let's<br><em>talk</em> systems.</h2>
+    </div>
+
+    <div class="sn-contact-grid">
+      <div class="sn-reveal">
+        <p class="sn-contact-headline">Building<br>something<br><em>hard?</em></p>
+        <p class="sn-contact-subtext">
+          I'm looking for Summer 2026 internships where problems have structural depth —
+          backend systems, developer tooling, infrastructure, or anything that rewards
+          thinking about the lower layers. Remote-friendly companies preferred.
+        </p>
+      </div>
+      <div class="sn-contact-links sn-reveal">
+        <a href="mailto:nandanwar.d.shreyan@gmail.com" class="sn-contact-link">
+          <span class="sn-contact-link-label">Email</span>
+          <span class="sn-contact-arrow">→</span>
+        </a>
+        <a href="https://github.com/shreyannandanwar" target="_blank" class="sn-contact-link">
+          <span class="sn-contact-link-label">GitHub</span>
+          <span class="sn-contact-arrow">→</span>
+        </a>
+        <a href="https://www.linkedin.com/in/shreyan-nandanwar" target="_blank" class="sn-contact-link">
+          <span class="sn-contact-link-label">LinkedIn</span>
+          <span class="sn-contact-arrow">→</span>
+        </a>
+        <a href="{{ url_for('static', filename='Shreyan_Nandanwar_Resume.pdf') }}" target="_blank" class="sn-contact-link">
+          <span class="sn-contact-link-label">Resume / CV</span>
+          <span class="sn-contact-arrow">→</span>
+        </a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ─── FOOTER ────────────────────────────────────── -->
+<footer id="sn-footer">
+  <div class="sn-footer-left">© 2025 Shreyan Nandanwar — Nagpur, India</div>
+  <div class="sn-footer-right">Designed & built by <span>sn.</span></div>
+</footer>
+
+<!-- Google Fonts -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700;900&family=JetBrains+Mono:wght@300;400;500&family=Instrument+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+
+<script>
+  // Custom cursor
+  const snCursor = document.getElementById('snCursor');
+  const snRing = document.getElementById('snCursorRing');
+  let mx = 0, my = 0, rx = 0, ry = 0;
+  document.addEventListener('mousemove', e => {
+    mx = e.clientX; my = e.clientY;
+    snCursor.style.left = mx - 4 + 'px';
+    snCursor.style.top = my - 4 + 'px';
+  });
+  (function animRing() {
+    rx += (mx - rx) * 0.12;
+    ry += (my - ry) * 0.12;
+    snRing.style.left = rx - 18 + 'px';
+    snRing.style.top = ry - 18 + 'px';
+    requestAnimationFrame(animRing);
+  })();
+  document.querySelectorAll('a, button').forEach(el => {
+    el.addEventListener('mouseenter', () => {
+      snCursor.style.transform = 'scale(2.5)';
+      snRing.style.transform = 'scale(1.4)';
+    });
+    el.addEventListener('mouseleave', () => {
+      snCursor.style.transform = 'scale(1)';
+      snRing.style.transform = 'scale(1)';
+    });
+  });
+
+  // Navbar scroll
+  const snNav = document.getElementById('sn-nav');
+  window.addEventListener('scroll', () => {
+    snNav.classList.toggle('scrolled', window.scrollY > 40);
+  });
+
+  // Scroll reveal
+  const snReveals = document.querySelectorAll('.sn-reveal');
+  const snObserver = new IntersectionObserver(entries => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        setTimeout(() => entry.target.classList.add('visible'), 80);
+        snObserver.unobserve(entry.target);
+      }
+    });
+  }, { threshold: 0.08 });
+  snReveals.forEach(el => snObserver.observe(el));
+
+  // Smooth scroll for anchor links
+  document.querySelectorAll('a[href^="#"]').forEach(a => {
+    a.addEventListener('click', e => {
+      const target = document.querySelector(a.getAttribute('href'));
+      if (target) { e.preventDefault(); target.scrollIntoView({ behavior: 'smooth', block: 'start' }); }
+    });
+  });
+
+  // Close mobile menu on link click
+  document.querySelectorAll('#snMobileMenu a').forEach(a => {
+    a.addEventListener('click', () => document.getElementById('snMobileMenu').classList.remove('open'));
+  });
+</script>
+
+{% endblock %}
