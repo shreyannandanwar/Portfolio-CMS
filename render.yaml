@@ -13,6 +13,6 @@ services:
       - key: FLASK_ENV
         value: production
       - key: PYTHON_VERSION
-        value: 3.11.0
+        value: 3.11.1
       - key: DATABASE_URL
         value: sqlite:////data/portfolio.db
