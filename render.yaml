@@ -4,7 +4,7 @@ services:
     env: python
     plan: free
     buildCommand: pip install -r requirements.txt
-    startCommand: gunicorn -w 2 -b 0.0.0.0:$PORT "app:create_app('production')"
+    startCommand: gunicorn -w 2 -b 0.0.0.0:$PORT "run:app"
     disk:
       name: portfolio-data
       mountPath: /data
