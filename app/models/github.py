@@ -64,3 +64,19 @@ class GitHubRepo(db.Model):
 
     def __repr__(self):
         return f"<GitHubRepo {self.full_name}>"
+
+class GitHubCache(db.Model):
+    __tablename__ = 'github_cache'
+
+    id = db.Column(db.Integer, primary_key=True)
+    # We only ever keep one row (the latest snapshot).
+    username = db.Column(db.String(100), unique=True, nullable=False, index=True)
+
+    # Store the full payload as JSON.
+    # SQLAlchemy maps JSON → JSONB on PostgreSQL, TEXT on SQLite (dev/test).
+    payload = db.Column(db.JSON, nullable=False)
+
+    cached_at = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
+
+    def __repr__(self):
+        return f'<GitHubCache {self.username} @ {self.cached_at}>'

@@ -49,19 +49,31 @@ class DevelopmentConfig(Config):
 
 
 class ProductionConfig(Config):
-    """Production configuration"""
+    """
+    Production configuration — PostgreSQL only.
+
+    Railway injects DATABASE_URL automatically when you attach a Postgres
+    plugin.  The URL may start with 'postgres://' (legacy) which SQLAlchemy
+    2.x rejects; we normalise it to 'postgresql://' below.
+    """
     DEBUG = False
     TESTING = False
 
-    # DATABASE_URL env var is set on Render to point at the persistent disk.
-    # Fallback uses /data/portfolio.db — the Render persistent disk mount path.
-    # Do NOT use a relative path here; it gets wiped on every redeploy.
-    SQLALCHEMY_DATABASE_URI = os.getenv(
-        'DATABASE_URL',
-        'sqlite:////data/portfolio.db'
-    )
+    @classmethod
+    def _get_db_url(cls) -> str:
+        url = os.getenv('DATABASE_URL')
+        if not url:
+            raise ValueError(
+                "DATABASE_URL environment variable must be set in production. "
+                "Attach a PostgreSQL plugin on Railway and it will be injected automatically."
+            )
+        # SQLAlchemy 2.x requires 'postgresql://', not the legacy 'postgres://'
+        if url.startswith('postgres://'):
+            url = url.replace('postgres://', 'postgresql://', 1)
+        return url
 
-    # Secret key — must be set via environment variable on Render
+    SQLALCHEMY_DATABASE_URI = None   # set dynamically in __init_subclass__ / app factory
+
     SECRET_KEY = os.getenv('SECRET_KEY')
 
     # Security — HTTPS enforced on Render automatically
@@ -72,20 +84,23 @@ class ProductionConfig(Config):
     # CSRF Protection
     WTF_CSRF_ENABLED = True
 
-    # Logging
+    #Logging
     LOG_LEVEL = os.getenv('LOG_LEVEL', 'WARNING')
 
-    # SQLite-safe pool config
-    # pool_pre_ping and pool_recycle are PostgreSQL settings.
-    # They are harmless with SQLite but kept here so switching to
-    # PostgreSQL later requires zero config changes.
+    # PostgreSQL connection pool — keeps connections alive across requests
     SQLALCHEMY_ENGINE_OPTIONS = {
-        'pool_pre_ping': True,
-        'pool_recycle': 300,
+        'pool_pre_ping': True,       # discard stale connections
+        'pool_recycle': 300,         # recycle after 5 min
+        'pool_size': 5,              # base pool size
+        'max_overflow': 10,          # allow up to 15 total connections
+        'connect_args': {
+            'connect_timeout': 10,
+        },
     }
 
-    # Uploads go to persistent disk so they survive redeploys
-    UPLOAD_FOLDER = '/data/uploads'
+    # Uploads — Railway volumes or object storage; override via env var
+    UPLOAD_FOLDER = os.getenv('UPLOAD_FOLDER', 'static/uploads')
+
 
 
 class TestingConfig(Config):
