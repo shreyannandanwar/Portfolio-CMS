@@ -41,6 +41,7 @@ def create_app(config_name=None):
     login_manager.login_view = 'admin.login'
     login_manager.login_message = 'Please log in to access this page.'
     login_manager.login_message_category = 'info'
+    login_manager.session_protection = None          # <-- ADD THIS LINE
 
     from app.models.user import AdminUser
 
