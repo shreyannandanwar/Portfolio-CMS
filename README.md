@@ -63,7 +63,7 @@ The test suite runs against an in-memory SQLite database with CSRF disabled. Eac
 | Auth | bcrypt · HTTP-only session cookies |
 | Frontend | Jinja2 · Tailwind CSS |
 | Testing | pytest · pytest-cov |
-| Deployment | gunicorn · nginx |
+| Deployment | gunicorn · Render · Supabase Session Pooler |
 
 ---
 
@@ -114,11 +114,40 @@ pytest --cov=app tests/
 
 ## Deployment (production)
 
-```bash
-gunicorn -w 4 -b 0.0.0.0:8000 "app:create_app('production')"
+### Render + Supabase (Session Pooler)
+
+Render's free and starter instances are **IPv4-only**. Supabase's direct connection string uses IPv6, which will fail. You **must** use the **Session Pooler** connection string from Supabase (port `5432`, transaction or session mode).
+
+1. In your Supabase project go to **Settings → Database → Connection pooling** and copy the **Session pooler** URI.
+2. Append `?sslmode=require` if it is not already present.
+3. Set it as the `DATABASE_URL` environment variable on Render.
+
+**Required environment variables on Render:**
+
+```env
+FLASK_ENV=production
+SECRET_KEY=<strong-random-key>
+DATABASE_URL=postgresql://postgres.<project>:<password>@aws-0-<region>.pooler.supabase.com:5432/<database>?sslmode=require
+ADMIN_URL_PREFIX=/your-obscured-path
+LOG_LEVEL=WARNING
 ```
 
-Minimal nginx config:
+**Start command (Render):**
+
+```bash
+gunicorn -w 2 -b 0.0.0.0:$PORT "run:app"
+```
+
+> **Important:** `db.create_all()` is intentionally **skipped** on every boot in production to prevent startup failures when the database is momentarily unreachable and to avoid DDL races across multiple Gunicorn workers.
+> Run schema initialisation **once** after first deploy:
+>
+> ```bash
+> python init_db.py
+> ```
+>
+> If you need to re-create tables during development or a one-off setup, set `AUTO_CREATE_DB=1` in your environment variables — `db.create_all()` will run on the next boot.
+
+**Minimal nginx config (self-hosted):**
 
 ```nginx
 server {
@@ -137,16 +166,6 @@ server {
         expires 30d;
     }
 }
-```
-
-Production environment variables:
-
-```env
-FLASK_ENV=production
-SECRET_KEY=<strong-random-key>
-DATABASE_URL=postgresql://user:pass@localhost/dbname
-ADMIN_URL_PREFIX=/your-obscured-path
-LOG_LEVEL=WARNING
 ```
 
 ---

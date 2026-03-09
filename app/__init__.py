@@ -62,8 +62,16 @@ def create_app(config_name=None):
     add_security_headers(app)
 
     with app.app_context():
-        db.create_all()
-        app.logger.info('Database tables created/verified')
+        auto_create = os.getenv('AUTO_CREATE_DB', '').strip().lower() in ('1', 'true', 'yes')
+        if config_name != 'production' or auto_create:
+            db.create_all()
+            app.logger.info('Database tables created/verified')
+        else:
+            app.logger.info(
+                'Skipping db.create_all() in production. '
+                'Run "python init_db.py" (or your migration tool) to initialise the schema. '
+                'Set AUTO_CREATE_DB=1 to override this behaviour.'
+            )
 
     from app.admin import admin_bp
     from app.public import public_bp

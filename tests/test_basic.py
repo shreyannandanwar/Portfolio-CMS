@@ -1,6 +1,7 @@
 import pytest
 import sys
 import os
+from unittest.mock import patch
 
 # Add parent directory to path
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
@@ -204,6 +205,55 @@ class TestGitHubIntegration:
         response = auth_client.get('/control-panel-9f2c8a/github-sync')
         assert response.status_code == 200
         assert b'GitHub' in response.data or b'github' in response.data
+
+
+class TestProductionDbCreateAll:
+    """Ensure db.create_all() is not called on production startup unless AUTO_CREATE_DB is set."""
+
+    _PROD_ENV = {
+        'SECRET_KEY': 'test-secret-key-for-prod-tests',
+        'DATABASE_URL': 'postgresql://user:pass@localhost/testdb',
+    }
+
+    def test_production_skips_create_all_by_default(self):
+        """create_app('production') must NOT call db.create_all() without AUTO_CREATE_DB."""
+        env_patch = {**self._PROD_ENV}
+        env_patch.pop('AUTO_CREATE_DB', None)
+
+        with patch.dict(os.environ, env_patch, clear=False):
+            os.environ.pop('AUTO_CREATE_DB', None)
+            with patch('app.extensions.db.create_all') as mock_create_all:
+                try:
+                    create_app('production')
+                except Exception:
+                    # A connection error is acceptable; what matters is create_all was not called.
+                    pass
+                mock_create_all.assert_not_called()
+
+    def test_production_calls_create_all_when_auto_create_db_set(self):
+        """create_app('production') MUST call db.create_all() when AUTO_CREATE_DB=1."""
+        env_patch = {**self._PROD_ENV, 'AUTO_CREATE_DB': '1'}
+
+        with patch.dict(os.environ, env_patch, clear=False):
+            with patch('app.extensions.db.create_all') as mock_create_all:
+                try:
+                    create_app('production')
+                except Exception:
+                    pass
+                mock_create_all.assert_called_once()
+
+    def test_development_always_calls_create_all(self):
+        """Development/testing environments must always call db.create_all() regardless of AUTO_CREATE_DB."""
+        with patch.dict(os.environ, {}, clear=False):
+            os.environ.pop('AUTO_CREATE_DB', None)
+            with patch('app.extensions.db.create_all') as mock_create_all:
+                try:
+                    create_app('testing')
+                except Exception:
+                    # A missing-module or connection error is acceptable;
+                    # what matters is that create_all WAS called.
+                    pass
+                mock_create_all.assert_called_once()
 
 
 if __name__ == '__main__':
