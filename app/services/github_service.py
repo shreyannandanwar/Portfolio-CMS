@@ -2,7 +2,8 @@ import requests
 from datetime import datetime, timedelta
 import json
 import os
-import logger
+import logging
+logger = logging.getLogger(__name__)
 
 
 class GitHubService:
