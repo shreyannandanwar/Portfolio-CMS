@@ -77,11 +77,17 @@ class ProductionConfig(Config):
 
     # Lax (not Strict) — prevents cookie being dropped on proxy redirects
     SESSION_COOKIE_SAMESITE = 'Lax'
-    SESSION_COOKIE_SECURE = True
+    SESSION_COOKIE_SECURE = False
     SESSION_COOKIE_HTTPONLY = True
 
     # Tell Flask the public-facing scheme is https
     PREFERRED_URL_SCHEME = 'https'
+
+    # Flask-Login "remember me" cookie
+    REMEMBER_COOKIE_SECURE = True
+    REMEMBER_COOKIE_HTTPONLY = True
+    REMEMBER_COOKIE_SAMESITE = 'Lax'
+    REMEMBER_COOKIE_DURATION = 604800  # 7 days
 
     WTF_CSRF_ENABLED = True
     LOG_LEVEL = os.getenv('LOG_LEVEL', 'WARNING')
