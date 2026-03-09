@@ -7,34 +7,35 @@ def create_app(config_name=None):
 
     app = Flask(__name__, instance_relative_config=True)
 
-    # ── Determine config ────────────────────────────────────────────────────
     if config_name is None:
         config_name = os.getenv('FLASK_ENV', 'development')
 
     from app.config import config
     cfg_class = config[config_name]
 
-    # ProductionConfig derives DATABASE_URL dynamically; resolve it here so
-    # SQLAlchemy picks it up before any extension is initialised.
     if config_name == 'production':
         cfg_class.SQLALCHEMY_DATABASE_URI = cfg_class._get_db_url()
 
     app.config.from_object(cfg_class)
 
-    # ── Validate secrets ────────────────────────────────────────────────────
     if config_name == 'production':
         if not app.config.get('SECRET_KEY'):
             raise ValueError("SECRET_KEY environment variable must be set in production!")
         if not app.config.get('SQLALCHEMY_DATABASE_URI'):
             raise ValueError("DATABASE_URL environment variable must be set in production!")
 
-    # ── Instance folder ─────────────────────────────────────────────────────
+        # Fix for Render's reverse proxy — trust the X-Forwarded-Proto header
+        # so Flask knows the request came in over HTTPS even though gunicorn
+        # sees HTTP internally. Without this, url_for() generates http:// URLs
+        # and SESSION_COOKIE_SECURE cookies are never sent back by the browser.
+        from werkzeug.middleware.proxy_fix import ProxyFix
+        app.wsgi_app = ProxyFix(app.wsgi_app, x_for=1, x_proto=1, x_host=1)
+
     try:
         os.makedirs(app.instance_path)
     except OSError:
         pass
 
-    # ── Extensions ──────────────────────────────────────────────────────────
     from app.extensions import db, login_manager, csrf
 
     db.init_app(app)
@@ -51,38 +52,33 @@ def create_app(config_name=None):
     def load_user(user_id):
         return AdminUser.query.get(int(user_id))
 
-    # ── Logging ─────────────────────────────────────────────────────────────
     from app.utils.logging_config import setup_logging
     setup_logging(app)
 
-    # ── Error handlers ──────────────────────────────────────────────────────
     from app.utils.error_handlers import register_error_handlers
     register_error_handlers(app)
 
-    # ── Security headers ────────────────────────────────────────────────────
     from app.utils.security import add_security_headers
     add_security_headers(app)
 
-    # ── Database tables ─────────────────────────────────────────────────────
     with app.app_context():
         db.create_all()
         app.logger.info('Database tables created/verified')
 
-    # ── Blueprints ──────────────────────────────────────────────────────────
     from app.admin import admin_bp
     from app.public import public_bp
+    from app.setup import setup_bp
 
     admin_prefix = app.config.get('ADMIN_URL_PREFIX', '/control-panel-9f2c8a')
 
     app.register_blueprint(admin_bp, url_prefix=admin_prefix)
     app.register_blueprint(public_bp)
+    app.register_blueprint(setup_bp)
 
     app.logger.info(f'Blueprints registered — Admin: {admin_prefix}, Public: /')
 
-    # ── Health check ────────────────────────────────────────────────────────
     @app.route('/health')
     def health_check():
-        """Health check endpoint for monitoring / Railway"""
         from app.extensions import db as _db
         try:
             _db.session.execute(_db.text('SELECT 1'))

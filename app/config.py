@@ -4,57 +4,57 @@ from datetime import timedelta
 
 class Config:
     """Base configuration"""
-    # Flask
     SECRET_KEY = os.getenv('SECRET_KEY', 'dev-secret-key-change-in-production')
-    
-    # Database
+
     SQLALCHEMY_TRACK_MODIFICATIONS = False
     SQLALCHEMY_ECHO = False
-    
-    # Session
+
     PERMANENT_SESSION_LIFETIME = timedelta(days=7)
-    SESSION_COOKIE_SECURE = False  # Set True in production with HTTPS
+    SESSION_COOKIE_SECURE = False
     SESSION_COOKIE_HTTPONLY = True
     SESSION_COOKIE_SAMESITE = 'Lax'
-    
-    # Upload settings
-    MAX_CONTENT_LENGTH = 16 * 1024 * 1024  # 16MB max file size
+
+    MAX_CONTENT_LENGTH = 16 * 1024 * 1024  # 16MB
     UPLOAD_FOLDER = 'static/uploads'
-    
-    # GitHub Integration
+
     GITHUB_USERNAME = os.getenv('GITHUB_USERNAME', 'your-github-username')
     GITHUB_CACHE_DURATION_DAYS = 30
-    
-    # Pagination
+
     POSTS_PER_PAGE = 10
-    
-    # Admin URL
+
     ADMIN_URL_PREFIX = os.getenv('ADMIN_URL_PREFIX', '/control-panel-9f2c8a')
 
 
 class DevelopmentConfig(Config):
-    """Development configuration"""
     DEBUG = True
     TESTING = False
-    
-    # Database
+
     SQLALCHEMY_DATABASE_URI = os.getenv(
         'DATABASE_URL',
         'sqlite:///' + os.path.join(os.path.abspath('instance'), 'portfolio.db')
     )
-    SQLALCHEMY_ECHO = True  # Log SQL queries
-    
+    SQLALCHEMY_ECHO = True
     WTF_CSRF_ENABLED = True
     SESSION_COOKIE_SECURE = False
 
 
 class ProductionConfig(Config):
     """
-    Production configuration — PostgreSQL only.
+    Production — PostgreSQL via Supabase session pooler.
 
-    Railway injects DATABASE_URL automatically when you attach a Postgres
-    plugin.  The URL may start with 'postgres://' (legacy) which SQLAlchemy
-    2.x rejects; we normalise it to 'postgresql://' below.
+    SESSION_COOKIE_SAMESITE = 'Lax':
+        'Strict' causes the browser to drop the session cookie when Render's
+        proxy redirects after login, logging the user out immediately.
+        'Lax' keeps the cookie across same-site top-level navigations.
+
+    SESSION_COOKIE_SECURE = True:
+        Render terminates SSL at the proxy layer and forwards as HTTP internally.
+        Flask-Login needs REMEMBER_COOKIE_SECURE and SESSION_COOKIE_SECURE=True
+        so the cookie is only sent over HTTPS from the browser side.
+
+    PREFERRED_URL_SCHEME = 'https':
+        Tells Flask that the canonical URL scheme is https even though gunicorn
+        sees http internally (Render's proxy strips SSL before forwarding).
     """
     DEBUG = False
     TESTING = False
@@ -64,66 +64,63 @@ class ProductionConfig(Config):
         url = os.getenv('DATABASE_URL')
         if not url:
             raise ValueError(
-                "DATABASE_URL environment variable must be set in production. "
-                "Attach a PostgreSQL plugin on Railway and it will be injected automatically."
+                "DATABASE_URL must be set in production. "
+                "Use the Session Pooler connection string from Supabase."
             )
-        # SQLAlchemy 2.x requires 'postgresql://', not the legacy 'postgres://'
         if url.startswith('postgres://'):
             url = url.replace('postgres://', 'postgresql://', 1)
         return url
 
-    SQLALCHEMY_DATABASE_URI = None   # set dynamically in __init_subclass__ / app factory
+    SQLALCHEMY_DATABASE_URI = None  # resolved in app factory
 
     SECRET_KEY = os.getenv('SECRET_KEY')
 
-    # Security — HTTPS enforced on Render automatically
+    # Lax (not Strict) — prevents cookie being dropped on proxy redirects
+    SESSION_COOKIE_SAMESITE = 'Lax'
     SESSION_COOKIE_SECURE = True
     SESSION_COOKIE_HTTPONLY = True
-    SESSION_COOKIE_SAMESITE = 'Strict'
 
-    # CSRF Protection
+    # Tell Flask the public-facing scheme is https
+    PREFERRED_URL_SCHEME = 'https'
+
     WTF_CSRF_ENABLED = True
-
-    #Logging
     LOG_LEVEL = os.getenv('LOG_LEVEL', 'WARNING')
 
-    # PostgreSQL connection pool — keeps connections alive across requests
     SQLALCHEMY_ENGINE_OPTIONS = {
-        'pool_pre_ping': True,       # discard stale connections
-        'pool_recycle': 300,         # recycle after 5 min
-        'pool_size': 5,              # base pool size
-        'max_overflow': 10,          # allow up to 15 total connections
+        'pool_pre_ping': True,
+        'pool_recycle': 280,
+        'pool_size': 3,
+        'max_overflow': 5,
         'connect_args': {
             'connect_timeout': 10,
+            'keepalives': 1,
+            'keepalives_idle': 30,
+            'keepalives_interval': 10,
+            'keepalives_count': 5,
+            'sslmode': 'require',
         },
     }
 
-    # Uploads — Railway volumes or object storage; override via env var
     UPLOAD_FOLDER = os.getenv('UPLOAD_FOLDER', 'static/uploads')
 
 
-
 class TestingConfig(Config):
-    """Testing configuration"""
     TESTING = True
     DEBUG = True
-    
     SQLALCHEMY_DATABASE_URI = 'sqlite:///:memory:'
     WTF_CSRF_ENABLED = False
     BCRYPT_LOG_ROUNDS = 4
     RATELIMIT_ENABLED = False
 
 
-# Configuration dictionary
 config = {
     'development': DevelopmentConfig,
     'production': ProductionConfig,
     'testing': TestingConfig,
-    'default': DevelopmentConfig
+    'default': DevelopmentConfig,
 }
 
 
 def get_config():
-    """Get configuration based on environment"""
     env = os.getenv('FLASK_ENV', 'development')
     return config.get(env, config['default'])
