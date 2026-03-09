@@ -77,7 +77,7 @@ class ProductionConfig(Config):
 
     # Lax (not Strict) — prevents cookie being dropped on proxy redirects
     SESSION_COOKIE_SAMESITE = 'Lax'
-    SESSION_COOKIE_SECURE = True
+    SESSION_COOKIE_SECURE = False
     SESSION_COOKIE_HTTPONLY = True
 
     # Tell Flask the public-facing scheme is https
