@@ -13,6 +13,10 @@ class GitHubService:
         self.cache_duration = timedelta(
             days=int(os.getenv('GITHUB_CACHE_DURATION_DAYS', 30))
         )
+        # ✅ FIX: define cache file path
+        os.makedirs('instance', exist_ok=True)
+        safe_username = (username or "default").replace("/", "_")
+        self.cache_file = os.path.join('instance', f'github_cache_{safe_username}.json')
 
     def _make_request(self, endpoint):
         """Make request to GitHub API"""
