@@ -2,6 +2,8 @@ import requests
 from datetime import datetime, timedelta
 import json
 import os
+import logging
+logger = logging.getLogger(__name__)
 
 
 class GitHubService:
@@ -11,9 +13,14 @@ class GitHubService:
         self.username = username
         self.token = token
         self.base_url = "https://api.github.com"
-        self.cache_file = os.path.join('instance', 'github_cache.json')
-        self.cache_duration = timedelta(days=30)  # Cache for 30 days
-    
+        self.cache_duration = timedelta(
+            days=int(os.getenv('GITHUB_CACHE_DURATION_DAYS', 30))
+        )
+        # ✅ FIX: define cache file path
+        os.makedirs('instance', exist_ok=True)
+        safe_username = (username or "default").replace("/", "_")
+        self.cache_file = os.path.join('instance', f'github_cache_{safe_username}.json')
+
     def _make_request(self, endpoint):
         """Make request to GitHub API"""
         url = f"{self.base_url}{endpoint}"
@@ -21,6 +28,9 @@ class GitHubService:
             'Accept': 'application/vnd.github.v3+json',
             'User-Agent': 'Flask-Portfolio-App'
         }
+        token = os.getenv('GITHUB_TOKEN')
+        if token:
+            headers['Authorization'] = f'Bearer {token}'
         
         # Add authentication if token is available
         if self.token:
@@ -33,6 +43,30 @@ class GitHubService:
         except requests.exceptions.RequestException as e:
             print(f"GitHub API error: {e}")
             return None
+
+    def _save_to_db(self, data: dict) -> bool:
+        """Upsert the cache row in PostgreSQL."""
+        try:
+            from app.extensions import db
+            from app.models.github import GitHubCache
+
+            row = GitHubCache.query.filter_by(username=self.username).first()
+            if row:
+                row.payload = data
+                row.cached_at = datetime.utcnow()
+            else:
+                row = GitHubCache(
+                    username=self.username,
+                    payload=data,
+                    cached_at=datetime.utcnow(),
+                )
+                db.session.add(row)
+            db.session.commit()
+            logger.info('GitHub cache saved to DB for %s', self.username)
+            return True
+        except Exception as exc:
+            logger.error('Error saving GitHub cache to DB: %s', exc)
+            return False
     
     def fetch_user_data(self):
         """Fetch user profile data"""
@@ -79,7 +113,7 @@ class GitHubService:
         total_stars = sum(repo['stars'] for repo in repos)
         total_forks = sum(repo['forks'] for repo in repos)
         
-        languages = {}
+        languages : dict[str, int] = {}
         for repo in repos:
             lang = repo.get('language')
             if lang:
@@ -150,10 +184,11 @@ class GitHubService:
         if not force_refresh:
             cached_data = self.get_cached_data()
             if cached_data:
-                print("Using cached GitHub data")
+                logger.debug('Serving GitHub data from DB cache')
                 return cached_data
         
         print("Fetching fresh GitHub data...")
+        logger.info('Fetching fresh GitHub data from API for %s', self.username)
         
         # Fetch fresh data
         user_stats = self.fetch_user_stats()

@@ -1,4 +1,4 @@
-from flask import render_template, redirect, url_for, flash, request, jsonify, current_app
+from flask import render_template, redirect, url_for, flash, request, jsonify, current_app, session
 from flask_login import login_user, logout_user, login_required, current_user
 from app.admin import admin_bp
 from app.extensions import db, csrf
@@ -29,7 +29,8 @@ def login():
         user = AdminUser.query.filter_by(username=username).first()
         
         if user and check_password(password, user.password_hash):
-            login_user(user)
+            login_user(user, remember=True)        # <-- add remember=True
+            session.permanent = True                # <-- add this line
             flash('Login successful!', 'success')
             return redirect(url_for('admin.dashboard'))
         else:
