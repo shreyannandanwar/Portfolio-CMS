@@ -7,8 +7,9 @@ import os
 class GitHubService:
     """Service for fetching and caching GitHub data"""
     
-    def __init__(self, username):
+    def __init__(self, username, token=None):
         self.username = username
+        self.token = token
         self.base_url = "https://api.github.com"
         self.cache_file = os.path.join('instance', 'github_cache.json')
         self.cache_duration = timedelta(days=30)  # Cache for 30 days
@@ -20,6 +21,10 @@ class GitHubService:
             'Accept': 'application/vnd.github.v3+json',
             'User-Agent': 'Flask-Portfolio-App'
         }
+        
+        # Add authentication if token is available
+        if self.token:
+            headers['Authorization'] = f'token {self.token}'
         
         try:
             response = requests.get(url, headers=headers, timeout=10)
@@ -211,4 +216,5 @@ def get_github_service():
     """Factory function to get GitHub service with configured username"""
     # You can configure your GitHub username here or via environment variable
     username = os.getenv('GITHUB_USERNAME', 'your-github-username')
-    return GitHubService(username)
+    token = os.getenv('GITHUB_TOKEN', None)
+    return GitHubService(username, token)

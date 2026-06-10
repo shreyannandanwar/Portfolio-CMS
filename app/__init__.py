@@ -77,7 +77,14 @@ def create_app(config_name=None):
     @app.route('/health')
     def health_check():
         """Health check endpoint for monitoring"""
-        return {'status': 'healthy', 'environment': config_name}, 200
+        try:
+            # Test database connection
+            db.session.execute(db.text('SELECT 1'))
+            db.session.commit()
+            return {'status': 'healthy', 'environment': config_name}, 200
+        except Exception as e:
+            app.logger.error(f'Health check failed: {str(e)}')
+            return {'status': 'unhealthy', 'error': str(e)}, 503
     
     app.logger.info(f'Application initialized in {config_name} mode')
     

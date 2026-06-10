@@ -14,12 +14,15 @@ def home():
     # Get featured repositories (top 6 by stars)
     featured_repos = []
     if github_data and 'repositories' in github_data:
-        repos = sorted(
-            github_data['repositories'], 
-            key=lambda x: x['stars'], 
-            reverse=True
-        )[:6]
-        featured_repos = repos
+        try:
+            repos = sorted(
+                github_data['repositories'], 
+                key=lambda x: x.get('stars', 0), 
+                reverse=True
+            )[:6]
+            featured_repos = repos
+        except Exception as e:
+            print(f"Error processing repositories: {e}")
     
     return render_template('home.html', 
                          github_data=github_data,

@@ -23,6 +23,7 @@ class Config:
     
     # GitHub Integration
     GITHUB_USERNAME = os.getenv('GITHUB_USERNAME', 'your-github-username')
+    GITHUB_TOKEN = os.getenv('GITHUB_TOKEN', None)  # Personal access token for higher rate limits
     GITHUB_CACHE_DURATION_DAYS = 30
     
     # Pagination
@@ -58,7 +59,7 @@ class ProductionConfig(Config):
     # Do NOT use a relative path here; it gets wiped on every redeploy.
     SQLALCHEMY_DATABASE_URI = os.getenv(
         'DATABASE_URL',
-        'sqlite:////data/portfolio.db'
+        'sqlite:///' + os.path.join(os.path.abspath(os.path.dirname(os.path.dirname(__file__))), 'instance', 'portfolio.db')
     )
 
     # Secret key — must be set via environment variable on Render
