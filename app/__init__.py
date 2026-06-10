@@ -13,9 +13,6 @@ def create_app(config_name=None):
     from app.config import config
     cfg_class = config[config_name]
 
-    if config_name == 'production':
-        cfg_class.SQLALCHEMY_DATABASE_URI = cfg_class._get_db_url()
-
     app.config.from_object(cfg_class)
 
     if config_name == 'production':
