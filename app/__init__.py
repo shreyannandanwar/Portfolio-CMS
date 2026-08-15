@@ -13,9 +13,6 @@ def create_app(config_name=None):
     from app.config import config
     cfg_class = config[config_name]
 
-    if config_name == 'production':
-        cfg_class.SQLALCHEMY_DATABASE_URI = cfg_class._get_db_url()
-
     app.config.from_object(cfg_class)
 
     if config_name == 'production':
@@ -82,15 +79,16 @@ def create_app(config_name=None):
 
     @app.route('/health')
     def health_check():
-        from app.extensions import db as _db
+        """Health check endpoint for monitoring"""
         try:
-            _db.session.execute(_db.text('SELECT 1'))
-            db_ok = True
-        except Exception:
-            db_ok = False
-        status = 'healthy' if db_ok else 'degraded'
-        return {'status': status, 'environment': config_name, 'db': db_ok}, 200 if db_ok else 503
-
-    app.logger.info(f'Application initialised in {config_name} mode')
-
+            # Test database connection
+            db.session.execute(db.text('SELECT 1'))
+            db.session.commit()
+            return {'status': 'healthy', 'environment': config_name}, 200
+        except Exception as e:
+            app.logger.error(f'Health check failed: {str(e)}')
+            return {'status': 'unhealthy', 'error': str(e)}, 503
+    
+    app.logger.info(f'Application initialized in {config_name} mode')
+    
     return app

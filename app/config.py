@@ -18,6 +18,7 @@ class Config:
     UPLOAD_FOLDER = 'static/uploads'
 
     GITHUB_USERNAME = os.getenv('GITHUB_USERNAME', 'your-github-username')
+    GITHUB_TOKEN = os.getenv('GITHUB_TOKEN', None)  # Personal access token for higher rate limits
     GITHUB_CACHE_DURATION_DAYS = 30
 
     POSTS_PER_PAGE = 10
@@ -59,19 +60,13 @@ class ProductionConfig(Config):
     DEBUG = False
     TESTING = False
 
-    @classmethod
-    def _get_db_url(cls) -> str:
-        url = os.getenv('DATABASE_URL')
-        if not url:
-            raise ValueError(
-                "DATABASE_URL must be set in production. "
-                "Use the Session Pooler connection string from Supabase."
-            )
-        if url.startswith('postgres://'):
-            url = url.replace('postgres://', 'postgresql://', 1)
-        return url
-
-    SQLALCHEMY_DATABASE_URI = None  # resolved in app factory
+    # DATABASE_URL env var is set on Render to point at the persistent disk.
+    # Fallback uses /data/portfolio.db — the Render persistent disk mount path.
+    # Do NOT use a relative path here; it gets wiped on every redeploy.
+    SQLALCHEMY_DATABASE_URI = os.getenv(
+        'DATABASE_URL',
+        'sqlite:///' + os.path.join(os.path.abspath(os.path.dirname(os.path.dirname(__file__))), 'instance', 'portfolio.db')
+    )
 
     SECRET_KEY = os.getenv('SECRET_KEY')
 
