@@ -29,8 +29,14 @@ def login():
         user = AdminUser.query.filter_by(username=username).first()
         
         if user and check_password(password, user.password_hash):
-            login_user(user, remember=True)        # <-- add remember=True
-            session.permanent = True                # <-- add this line
+            login_user(user, remember=True)
+            session.permanent = True
+            current_app.logger.info(
+                'Login OK — user=%s, is_authenticated=%s, session=%s',
+                user.username,
+                current_user.is_authenticated,
+                dict(session),
+            )
             flash('Login successful!', 'success')
             return redirect(url_for('admin.dashboard'))
         else:

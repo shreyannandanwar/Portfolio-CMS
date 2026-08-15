@@ -24,8 +24,10 @@ def create_app(config_name=None):
         if not app.config.get('SQLALCHEMY_DATABASE_URI'):
             raise ValueError("DATABASE_URL environment variable must be set in production!")
 
-        from werkzeug.middleware.proxy_fix import ProxyFix
-        app.wsgi_app = ProxyFix(app.wsgi_app, x_for=1, x_proto=1, x_host=1,  x_prefix=1)
+        # Only apply ProxyFix when actually behind a reverse proxy
+        if os.getenv('BEHIND_PROXY', '').strip().lower() in ('1', 'true', 'yes'):
+            from werkzeug.middleware.proxy_fix import ProxyFix
+            app.wsgi_app = ProxyFix(app.wsgi_app, x_for=1, x_proto=1, x_host=1, x_prefix=1)
 
     try:
         os.makedirs(app.instance_path)
