@@ -756,22 +756,22 @@
     </div>
 
     <h1 class="hero-name">
-      I think in<br><em>systems.</em>
+      I build<br><em>data systems</em>
     </h1>
 
     <div class="hero-descriptor">
       <p class="hero-descriptor-text">
         Self-taught engineer building at the intersection of
-        <strong>static analysis</strong>, <strong>backend architecture</strong>,
+        <strong>event-driven architecture</strong>, <strong>machine learning systems</strong>,
         and <strong>developer tooling</strong>. Every project is designed to last — not just to ship.
       </p>
     </div>
 
     <div class="hero-manifesto">
       <p>
-        "The industry over-optimizes for <strong>speed of delivery</strong> at the cost of architectural clarity.
-        I build the other way — understanding the lower layers first,
-        so when things break, I know exactly why."
+        "The industry over-optimizes for <strong>speed of delivery</strong> at the cost of observability.
+        I build the other way — immutable logs first, reproducible pipelines,
+        so models drift or events conflict, I know exactly why."
       </p>
     </div>
 
@@ -824,8 +824,7 @@
         </p>
         <p>
           Currently seeking <strong>Summer 2026 internships</strong> in backend engineering,
-          systems design, or developer tooling — ideally at companies that care about
-          the lower layers: Oracle, the Linux Foundation, or similar.
+          ML systems, or data infrastructure — ideally at teams shipping production-grade pipelines.
         </p>
       </div>
 
@@ -833,45 +832,47 @@
         <div class="sn-trait-card">
           <div class="sn-trait-label">// Superpower</div>
           <div class="sn-trait-text">
-            Systems-oriented thinking. When I look at a codebase, I'm mapping
-            its architecture — where the coupling is, what will break under load,
-            what the abstraction boundaries are trying to say.
+            Bridging ML research and production systems. I can read a paper and ship the pipeline —
+          from feature stores and streaming inference to automated retraining and model registry.
           </div>
         </div>
         <div class="sn-trait-card">
           <div class="sn-trait-label">// Conviction</div>
           <div class="sn-trait-text">
-            Understanding lower layers makes you a better engineer at every layer above.
-            I'd rather understand why TCP keeps order than just know that it does.
+            Immutable logs over mutable state. Event sourcing makes debugging, auditing, and recovery
+          trivial compared to CRUD. I'd rather replay a stream than guess what overwrote the database.
           </div>
         </div>
         <div class="sn-trait-card">
           <div class="sn-trait-label">// Currently exploring</div>
           <div class="sn-trait-text">
-            Hybrid static + semantic code analysis. Tools that understand code
-            <em>architecturally</em>, not just syntactically — finding risks that
-            linters and embeddings both miss independently.
+            Real-time feature stores and streaming ML inference. How to serve <em>sub-100ms</em> predictions
+          on event streams without training-serving skew.
           </div>
         </div>
         <div class="sn-skills-block">
           <div class="sn-skills-label">// Deep confidence in</div>
           <div class="sn-skills-row">
-            <span class="sn-skill-tag core">Static Analysis</span>
-            <span class="sn-skill-tag core">Backend Architecture</span>
-            <span class="sn-skill-tag core">Algorithmic Reasoning</span>
+            <span class="sn-skill-tag core">Event-Driven Architecture</span>
+            <span class="sn-skill-tag core">ML Systems</span>
+            <span class="sn-skill-tag core">Backend Engineering</span>
           </div>
           <div class="sn-skills-label" style="margin-top:16px;">// Working tools</div>
           <div class="sn-skills-row">
-            <span class="sn-skill-tag">Rust</span>
+            <span class="sn-skill-tag">Java</span>
+            <span class="sn-skill-tag">Spring Boot</span>
             <span class="sn-skill-tag">Python</span>
-            <span class="sn-skill-tag">Flask</span>
+            <span class="sn-skill-tag">FastAPI</span>
+            <span class="sn-skill-tag">Rust</span>
+            <span class="sn-skill-tag">Kafka</span>
             <span class="sn-skill-tag">PostgreSQL</span>
+            <span class="sn-skill-tag">Redis</span>
             <span class="sn-skill-tag">Docker</span>
             <span class="sn-skill-tag">Kubernetes</span>
-            <span class="sn-skill-tag">Tree-sitter</span>
-            <span class="sn-skill-tag">Redis</span>
-            <span class="sn-skill-tag">Terraform</span>
-            <span class="sn-skill-tag">Java</span>
+            <span class="sn-skill-tag">MLflow</span>
+            <span class="sn-skill-tag">XGBoost</span>
+            <span class="sn-skill-tag">React</span>
+            <span class="sn-skill-tag">Git</span>
           </div>
         </div>
       </div>
@@ -890,166 +891,166 @@
     </div>
 
     <!-- P.01: Code Intelligence Engine -->
+        <!-- P.01: Event Schema Registry & Immutable Audit Pipeline -->
     <div class="sn-project-item sn-reveal">
       <div class="sn-project-meta">
         <div class="sn-project-num">P.01</div>
         <div class="sn-project-stack">
+          <span class="sn-stack-item">Java</span>
+          <span class="sn-stack-item">Spring Boot</span>
+          <span class="sn-stack-item">React</span>
+          <span class="sn-stack-item">PostgreSQL</span>
+          <span class="sn-stack-item">Docker</span>
+        </div>
+      </div>
+      <div class="sn-project-content">
+        <div class="sn-project-top">
+          <h3 class="sn-project-name">Event Schema Registry<br>& Immutable Audit Pipeline</h3>
+          <span class="sn-project-year">2026</span>
+        </div>
+        <div class="sn-project-problem">CRUD systems overwrite state and lose history</div>
+        <p class="sn-project-desc">
+          A full-stack event-driven audit pipeline that ingests, validates, and persists immutable business events.
+          It enforces JSON schemas at the gateway, maintains append-only audit trails per trace, and materializes
+          state snapshots for fast reads — giving you a complete, tamper-evident history of how any system state evolved.
+        </p>
+        <div class="sn-project-insight">
+          <div class="sn-insight-label">// Hardest decision</div>
+          <p>
+            Optimistic concurrency control with expectedVersion vs. eventual consistency. I chose strict ordering
+            at the trace level because auditability is worthless if events can silently conflict. The tradeoff
+            is slightly lower write throughput, but it guarantees a linearizable history that is trivial to replay.
+          </p>
+        </div>
+        <div class="sn-project-metrics">
+          <div class="sn-metric">
+            <span class="sn-metric-val">&lt;50<span class="unit">ms</span></span>
+            <span class="sn-metric-label">event ingestion</span>
+          </div>
+          <div class="sn-metric">
+            <span class="sn-metric-val">100<span class="unit">%</span></span>
+            <span class="sn-metric-label">schema enforcement</span>
+          </div>
+          <div class="sn-metric">
+            <span class="sn-metric-val">CQRS<span class="unit">+</span>Event Sourcing</span>
+            <span class="sn-metric-label">architecture pattern</span>
+          </div>
+          <div class="sn-metric">
+            <span class="sn-metric-val">Docker</span>
+            <span class="sn-metric-label">containerized deploy</span>
+          </div>
+        </div>
+        <a href="https://github.com/shreyannandanwar/Event-Schema-Registry-and-Immutable-Audit-Pipeline" target="_blank" class="sn-project-link">
+          View on GitHub →
+        </a>
+      </div>
+    </div>
+
+    <!-- P.02: Code Intelligence Engine -->
+    <div class="sn-project-item sn-reveal">
+      <div class="sn-project-meta">
+        <div class="sn-project-num">P.02</div>
+        <div class="sn-project-stack">
           <span class="sn-stack-item">Rust</span>
-          <span class="sn-stack-item">Python</span>
-          <span class="sn-stack-item">Tree-sitter</span>
-          <span class="sn-stack-item">LangGraph</span>
-          <span class="sn-stack-item">FAISS</span>
+          <span class="sn-stack-item">TypeScript</span>
+          <span class="sn-stack-item">LMDB</span>
+          <span class="sn-stack-item">LSP</span>
+          <span class="sn-stack-item">LLM APIs</span>
         </div>
       </div>
       <div class="sn-project-content">
         <div class="sn-project-top">
           <h3 class="sn-project-name">Code Intelligence<br>Engine</h3>
-          <span class="sn-project-year">2025</span>
+          <span class="sn-project-year">2026</span>
         </div>
-        <div class="sn-project-problem">The gap no tool was filling</div>
+        <div class="sn-project-problem">Large codebases are too complex to navigate manually</div>
         <p class="sn-project-desc">
-          Most code quality tools do one of two things: lint surface-level style,
-          or embed code into vectors and hope semantic similarity catches real problems.
-          Neither understands <strong>architecture</strong>. I built a Rust CLI that
-          combines AST traversal via Tree-sitter with semantic reasoning —
-          detecting structural risks that exist between modules, not just inside them.
+          A high-performance developer toolchain that indexes TypeScript code into a structured symbol graph,
+          exposing fast CLI and LSP queries, and layering contextual AI explanations on top. It moves developers
+          from "where is this defined?" to "what does this do and why?" in one flow — without leaving the editor.
         </p>
         <div class="sn-project-insight">
           <div class="sn-insight-label">// Hardest decision</div>
           <p>
-            Static-only vs hybrid analysis. Choosing the indexing granularity that preserves
-            structural context without blowing up memory. Early rules were too coupled
-            to traversal logic — I redesigned around a clean rule abstraction layer
-            so extension became additive, not surgical.
+            Incremental re-indexing vs. full rebuilds. I built a file-watcher delta system that only
+            re-parses changed files, but this added significant complexity to symbol graph updates.
+            The payoff: indexing drops from minutes to seconds on large repos, keeping developer feedback loops tight.
           </p>
         </div>
         <div class="sn-project-metrics">
           <div class="sn-metric">
-            <span class="sn-metric-val">__K <span class="unit">LOC</span></span>
-            <span class="sn-metric-label">parsed / run</span>
+            <span class="sn-metric-val">&lt;100<span class="unit">ms</span></span>
+            <span class="sn-metric-label">symbol lookup</span>
           </div>
           <div class="sn-metric">
-            <span class="sn-metric-val">__<span class="unit">ms</span></span>
-            <span class="sn-metric-label">avg analysis time</span>
+            <span class="sn-metric-val">__<span class="unit">K</span></span>
+            <span class="sn-metric-label">symbols indexed</span>
           </div>
           <div class="sn-metric">
-            <span class="sn-metric-val">__<span class="unit">MB</span></span>
-            <span class="sn-metric-label">peak memory</span>
+            <span class="sn-metric-val">Rust<span class="unit">+</span>TS</span>
+            <span class="sn-metric-label">polyglot core</span>
           </div>
           <div class="sn-metric">
-            <span class="sn-metric-val">__</span>
-            <span class="sn-metric-label">risk categories</span>
+            <span class="sn-metric-val">LSP</span>
+            <span class="sn-metric-label">editor integration</span>
           </div>
         </div>
-        <a href="https://github.com/shreyannandanwar" target="_blank" class="sn-project-link">
+        <a href="https://github.com/shreyannandanwar/Code-Intelligent-Engine" target="_blank" class="sn-project-link">
           View on GitHub →
         </a>
       </div>
     </div>
 
-    <!-- P.02: Portfolio CMS -->
-    <div class="sn-project-item sn-reveal">
-      <div class="sn-project-meta">
-        <div class="sn-project-num">P.02</div>
-        <div class="sn-project-stack">
-          <span class="sn-stack-item">Python</span>
-          <span class="sn-stack-item">Flask</span>
-          <span class="sn-stack-item">PostgreSQL</span>
-          <span class="sn-stack-item">GitHub API</span>
-        </div>
-      </div>
-      <div class="sn-project-content">
-        <div class="sn-project-top">
-          <h3 class="sn-project-name">Portfolio CMS</h3>
-          <span class="sn-project-year">2025</span>
-        </div>
-        <div class="sn-project-problem">WordPress was overkill. Markdown was too raw.</div>
-        <p class="sn-project-desc">
-          I needed a place to exhibit work, not just display it. So I built a
-          <strong>production-ready CMS from scratch</strong>: admin panel, blog engine,
-          GitHub repo sync, security headers, and a cache layer.
-          The goal wasn't to avoid existing tools — it was to understand every layer
-          of the stack that usually gets hidden behind them.
-          <em>You're reading it right now.</em>
-        </p>
-        <div class="sn-project-insight">
-          <div class="sn-insight-label">// Hardest decision</div>
-          <p>
-            GitHub's API rate limits mean you can't fetch repo data on every visit.
-            I designed an internal cache with a manual refresh trigger —
-            understanding the tradeoff between data freshness and API budget.
-            Small problem, real production concern.
-          </p>
-        </div>
-        <div class="sn-project-metrics">
-          <div class="sn-metric">
-            <span class="sn-metric-val">~80<span class="unit">%</span></span>
-            <span class="sn-metric-label">fewer manual updates</span>
-          </div>
-          <div class="sn-metric">
-            <span class="sn-metric-val">70<span class="unit">%+</span></span>
-            <span class="sn-metric-label">test coverage</span>
-          </div>
-          <div class="sn-metric">
-            <span class="sn-metric-val">CSP<span class="unit">+</span>HSTS</span>
-            <span class="sn-metric-label">security headers</span>
-          </div>
-        </div>
-        <a href="https://github.com/shreyannandanwar" target="_blank" class="sn-project-link">
-          View on GitHub →
-        </a>
-      </div>
-    </div>
-
-    <!-- P.03: CloudShrink -->
+    <!-- P.03: FraudStream -->
     <div class="sn-project-item sn-reveal">
       <div class="sn-project-meta">
         <div class="sn-project-num">P.03</div>
         <div class="sn-project-stack">
-          <span class="sn-stack-item">Kubernetes</span>
-          <span class="sn-stack-item">Docker</span>
-          <span class="sn-stack-item">Terraform</span>
-          <span class="sn-stack-item">Redis</span>
-          <span class="sn-stack-item">Java</span>
+          <span class="sn-stack-item">Python</span>
+          <span class="sn-stack-item">Kafka</span>
+          <span class="sn-stack-item">FastAPI</span>
+          <span class="sn-stack-item">XGBoost</span>
+          <span class="sn-stack-item">MLflow</span>
         </div>
       </div>
       <div class="sn-project-content">
         <div class="sn-project-top">
-          <h3 class="sn-project-name">CloudShrink</h3>
-          <span class="sn-project-year">2024</span>
+          <h3 class="sn-project-name">FraudStream</h3>
+          <span class="sn-project-year">2026</span>
         </div>
-        <div class="sn-project-problem">Beginner cloud projects don't reflect real production</div>
+        <div class="sn-project-problem">Batch fraud detection is too slow; manual retraining breaks models</div>
         <p class="sn-project-desc">
-          A URL shortener is a solved problem. I chose it deliberately —
-          because the function is trivial, the architecture isn't.
-          I built it as <strong>microservices on Kubernetes with Terraform-provisioned infrastructure</strong>
-          to understand observability, scaling, and cost management
-          without the distraction of a complex domain.
+          An end-to-end, event-driven fraud detection system that processes streaming financial transactions
+          in real time. It ingests via Kafka, scores with XGBoost through FastAPI, stores results in PostgreSQL,
+          and automates the entire MLOps lifecycle: training, drift detection, and champion-challenger promotion via MLflow.
         </p>
         <div class="sn-project-insight">
           <div class="sn-insight-label">// Hardest decision</div>
           <p>
-            Monolith vs microservices. I chose microservices knowing it increased operational complexity —
-            because that complexity was the point. Retrospectively, I'd collapse certain services
-            in a real production startup. Architectural purity and operational pragmatism
-            aren't always the same goal.
+            Training-serving consistency vs. inference latency. I built a shared feature pipeline that generates
+            identical transformations for both training and serving, but this introduced a serialization bottleneck.
+            The fix: Redis caching for hot feature vectors and async batch updates for cold stores.
           </p>
         </div>
         <div class="sn-project-metrics">
           <div class="sn-metric">
-            <span class="sn-metric-val">&lt;80<span class="unit">ms</span></span>
-            <span class="sn-metric-label">avg redirect latency</span>
+            <span class="sn-metric-val">&lt;100<span class="unit">ms</span></span>
+            <span class="sn-metric-label">inference latency</span>
           </div>
           <div class="sn-metric">
             <span class="sn-metric-val">__<span class="unit">rps</span></span>
-            <span class="sn-metric-label">handled locally</span>
+            <span class="sn-metric-label">stream throughput</span>
           </div>
           <div class="sn-metric">
-            <span class="sn-metric-val">80<span class="unit">%</span></span>
-            <span class="sn-metric-label">cache hit rate</span>
+            <span class="sn-metric-val">Auto<span class="unit">-retrain</span></span>
+            <span class="sn-metric-label">MLOps pipeline</span>
+          </div>
+          <div class="sn-metric">
+            <span class="sn-metric-val">SHAP</span>
+            <span class="sn-metric-label">explainability</span>
           </div>
         </div>
-        <a href="https://github.com/shreyannandanwar" target="_blank" class="sn-project-link">
+        <a href="https://github.com/shreyannandanwar/Real-Time_Fraud-Detection-System_with_Automated-Retraining.git " target="_blank" class="sn-project-link">
           View on GitHub →
         </a>
       </div>
@@ -1058,7 +1059,7 @@
   </div>
 </section>
 
-<hr class="sn-divider">
+<!-- <hr class="sn-divider"> -->
 
 <!-- ─── GITHUB REPOS (preserved from original) ───── -->
 {% if featured_repos %}
@@ -1186,7 +1187,7 @@
 
 <!-- ─── FOOTER ────────────────────────────────────── -->
 <footer id="sn-footer">
-  <div class="sn-footer-left">© 2025 Shreyan Nandanwar — Nagpur, India</div>
+  <div class="sn-footer-left">© 2026 Shreyan Nandanwar — Nagpur, India</div>
   <div class="sn-footer-right">Designed & built by <span>sn.</span></div>
 </footer>
 
